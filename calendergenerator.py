@@ -3,6 +3,11 @@
 import re
 import datetime
 from dateutil import rrule
+import icalendar as ical
+import pytz
+
+tz = pytz.timezone('Europe/Berlin')
+
 
 entry = re.compile("^\|\s*(.*?)\s*\|\|\s*(.*?)\s*\|\|\s*(.*?)\s*$")
 
@@ -48,7 +53,14 @@ class DatePrinter(object):
 		pass
 
 	def getIcal(self):
-		raise Exception("not implemented")
+		event = ical.Event()
+		event.add('summary', self.getPlainName().encode("utf8"))
+		url = self.getURL()
+		if url:
+			event.add('url', url.encode("utf8"))
+		event.add('dtstart', self.getStartDate())
+		event.add('dtend', self.getEndDate())
+		return event
 	
 	def getMediawikiEntry(self):
 		raise Exception("not implemented")
@@ -230,9 +242,7 @@ class WeekdayTimeRangeGenerator(Generator):
 		stop = datetime.date(year2, month2, day2)
 		rule = rrule.rrule(rrule.WEEKLY,interval=interval, byweekday=wd, dtstart=start,until=stop)
 		for event in rule:
-			#print event,
 			event_end = event+delta
-			#, nonetime
 			if nonetime:
 				self.entries.append(RepSingleDateTime(name, (event.day, event.month, event.year, event.hour, event.minute), rule))
 			else:
@@ -272,7 +282,6 @@ tests = [(single_date, SingleDate),
 		(weekday_time_range, WeekdayTimeRangeGenerator)]
 
 def analyze_date(name ,date, rep):
-	#print date,"|", rep
 	for regex, dateClass in tests:
 		rg = regex.match(date)
 		if rg:
@@ -280,7 +289,6 @@ def analyze_date(name ,date, rep):
 				return dateClass(name, rg.groups(), rep)
 			else:
 				return dateClass(name, rg.groups())
-			#print name, rg.groups()
 
 def parse_wiki_page(content):
 	result = []
@@ -291,16 +299,11 @@ def parse_wiki_page(content):
 			continue
 		name, date, rep = dateinfo.groups()
 		obj = analyze_date(name, date, rep)
-		#print name, date, rep
 		if obj:
 			if issubclass(obj.__class__, Generator):
 				result.extend(obj.entries)
 			else:
 				result.append(obj)
-				pass
-				#print obj.getMediawikiEntry()
-			#print obj.getPlainName()
-			#print obj.getURL()
 	return result
 
 def next_up(entries):
@@ -317,7 +320,7 @@ def next_up(entries):
 				if reps[rule] > MAX_REPEATED:
 					continue
 				
-			result.append(entry)#.getMediawikiEntry()
+			result.append(entry)
 			
 	return result
 
@@ -336,7 +339,7 @@ def in_before(entries):
 				if reps[rule] > MAX_REPEATED:
 					continue
 				
-			result.append(entry)#.getMediawikiEntry()
+			result.append(entry)
 			
 	return result
 
@@ -345,7 +348,7 @@ def generate_wiki_section(entries):
 	result.append("=== '''Aktuelles''' ===")
 	result.append(u"<!-- Automatisch Generierter Content fängt hier an  -->")
 	result.append("----")
-	result.append("''siehe auch [[Kalender]] und [[:Kategorie:Termine]]''")
+	result.append("''siehe auch [[Kalender]] und [[:Kategorie:Termine]] <div style=\"float:right\">[[Termine| Termine verwalten]]</div>''")
 	for i in next_up(entries):
 		result.append(i.getMediawikiEntry())
 	result.append("----")

@@ -23,7 +23,7 @@ if old != text:
 	comment = u"Automatisches Update (irgendwas wird sich schon verändert haben)"#.encode("utf8")
 	if now-changed < datetime.timedelta(minutes=15):
 		comment = u"%s hat Termine aktualisiert (%s) " % (rev["user"] ,rev["comment"])
-	#print "update!"
-	#print comment
+	print "update!"
+	print comment
 	site.login(config.user, config.password)
-	#hauptseite.save(text, comment, minor=True)
+	hauptseite.save(text, comment, minor=True)
