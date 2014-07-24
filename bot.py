@@ -6,6 +6,7 @@ import time
 import config
 # pip install git+git://github.com/mwclient/mwclient.git
 import calendergenerator
+
 site = mwclient.Site(('https', 'stratum0.org'), path="/mediawiki/")
 
 termine = site.Pages["Termine"]
@@ -24,6 +25,6 @@ if old != text:
 	if now-changed < datetime.timedelta(minutes=15):
 		comment = u"%s hat Termine aktualisiert (%s) " % (rev["user"] ,rev["comment"])
 	print "update!"
-	print comment
+	print comment.encode("utf8")
 	site.login(config.user, config.password)
 	hauptseite.save(text, comment, minor=True)

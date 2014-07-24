@@ -41,7 +41,8 @@ dow_index = {"mo":0,
 DOW_STR = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
 
 DEFAULT_DURATION = 3 #3h
-MAX_REPEATED = 3
+MAX_NEXT_UP_REPEATED = 3
+MAX_IN_BEFORE_REPEATED = 1
 
 def make_extern(intern_url):
 	return "https://stratum0.org/wiki/%s" % intern_url.replace(" ", "_")
@@ -307,37 +308,37 @@ def parse_wiki_page(content):
 	return result
 
 def next_up(entries):
-	reps = {}
+	repeated_events = {}
 	now = datetime.datetime.now()-datetime.timedelta(hours=1)
 	result = []
 	for entry in sorted(entries):
 		if entry.getEndDate() > now:
-			rule = entry.rule
-			if rule:
-				if rule not in reps:
-					reps[rule] = 0
-				reps[rule] +=1
-				if reps[rule] > MAX_REPEATED:
-					continue
+			# detect repeating events by nameyy
+			eventid = entry.getPlainName()
+			if eventid not in repeated_events:
+				repeated_events[eventid] = 0
+			repeated_events[eventid] +=1
+			if repeated_events[eventid] > MAX_NEXT_UP_REPEATED:
+				continue
 				
 			result.append(entry)
 			
 	return result
 
 def in_before(entries):
-	reps = {}
+	repeated_events = {}
 	now = datetime.datetime.now()-datetime.timedelta(hours=1)
 	lowest = datetime.datetime.now()-datetime.timedelta(days=31)
 	result = []
 	for entry in sorted(entries,reverse=True):
 		if entry.getEndDate() < now  and entry.getEndDate() > lowest:
-			rule = entry.rule
-			if rule:
-				if rule not in reps:
-					reps[rule] = 0
-				reps[rule] +=1
-				if reps[rule] > MAX_REPEATED:
-					continue
+			# detect repeating events by nameyy
+			eventid = entry.getPlainName()
+			if eventid not in repeated_events:
+				repeated_events[eventid] = 0
+			repeated_events[eventid] +=1
+			if repeated_events[eventid] > MAX_IN_BEFORE_REPEATED:
+				continue
 				
 			result.append(entry)
 			
@@ -348,7 +349,7 @@ def generate_wiki_section(entries):
 	result.append("=== '''Aktuelles''' ===")
 	result.append(u"<!-- Automatisch Generierter Content fängt hier an  -->")
 	result.append("----")
-	result.append("''siehe auch [[Kalender]] und [[:Kategorie:Termine]] <div style=\"float:right\">[[Termine| Termine verwalten]]</div>''")
+	result.append("''siehe auch [[Kalender]] und [[:Kategorie:Termine]] <div style=\"float:right\">[[Termine| Termine verwalten]] (beta)</div>''")
 	for i in next_up(entries):
 		result.append(i.getMediawikiEntry())
 	result.append("----")
