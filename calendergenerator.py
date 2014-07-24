@@ -83,7 +83,6 @@ class DatePrinter(object):
 	def getURL(self):
 		urls_intern = mediawiki_intern_link.findall(self.name)
 		urls_extern = mediawiki_extern_link.findall(self.name)
-		print urls_intern, urls_extern
 		extern_url = None
 		intern_url = None
 		if urls_extern:
