@@ -114,7 +114,7 @@ class SingleDate(DatePrinter):
 	def __init__(self, name, values):
 		DatePrinter.__init__(self, name)
 		day, month, year = map(int, values)
-		self.date = datetime.datetime(year, month, day, 0 , 0, tzinfo=tz)
+		self.date = tz.localize(datetime.datetime(year, month, day, 0 , 0))
 	
 	def getMediawikiEntry(self):
 		dow = DOW_STR[self.date.weekday()]
@@ -130,7 +130,7 @@ class SingleDateTime(DatePrinter):
 	def __init__(self, name, values):
 		DatePrinter.__init__(self, name)
 		day, month, year, hour, minute = map(int, values)
-		self.date = datetime.datetime(year, month, day, hour, minute, tzinfo=tz)
+		self.date = tz.localize(datetime.datetime(year, month, day, hour, minute))
 	
 	def getMediawikiEntry(self):
 		dow = DOW_STR[self.date.weekday()]
@@ -146,8 +146,8 @@ class SingleDateTimeRange(DatePrinter):
 	def __init__(self, name, values):
 		DatePrinter.__init__(self, name)
 		day, month, year, hour, minute, hour2, minute2 = map(int, values)
-		self.date = datetime.datetime(year, month, day, hour, minute, tzinfo=tz)
-		self.date2 = datetime.datetime(year, month, day, hour2, minute2, tzinfo=tz)
+		self.date = tz.localize(datetime.datetime(year, month, day, hour, minute))
+		self.date2 = tz.localize(datetime.datetime(year, month, day, hour2, minute2))
 	
 	def getMediawikiEntry(self):
 		dow = DOW_STR[self.date.weekday()]
@@ -164,8 +164,8 @@ class DateRange(DatePrinter):
 	def __init__(self, name, values):
 		DatePrinter.__init__(self, name)
 		day, month, year, day2, month2, year2 = map(int, values)
-		self.date = datetime.datetime(year, month, day, 0, 0, tzinfo=tz)
-		self.date2 = datetime.datetime(year2, month2, day2, 0, 0, tzinfo=tz)
+		self.date = tz.localize(datetime.datetime(year, month, day, 0, 0))
+		self.date2 = tz.localize(datetime.datetime(year2, month2, day2, 0, 0))
 	
 	def getMediawikiEntry(self):
 		dow = DOW_STR[self.date.weekday()]
@@ -182,8 +182,8 @@ class DateRangeTime(DatePrinter):
 	def __init__(self, name, values):
 		DatePrinter.__init__(self, name)
 		day, month, year, hour, minute, day2, month2, year2, hour2, minute2 = map(int, values)
-		self.date = datetime.datetime(year, month, day, hour, minute, tzinfo=tz)
-		self.date2 = datetime.datetime(year2, month2, day2, hour2, minute2, tzinfo=tz)
+		self.date = tz.localize(datetime.datetime(year, month, day, hour, minute))
+		self.date2 = tz.localize(datetime.datetime(year2, month2, day2, hour2, minute2))
 	
 	def getMediawikiEntry(self):
 		dow = DOW_STR[self.date.weekday()]
@@ -234,12 +234,12 @@ class WeekdayTimeRangeGenerator(Generator):
 			return
 		wd = dow_index[wd.lower()]
 		day, month, year, day2, month2, year2 = map(int, rep.groups())
-		start = datetime.datetime(year, month, day, hour, minute, tzinfo=tz)
-		start2 = datetime.datetime(year, month, day, hour2, minute2, tzinfo=tz)
+		start = tz.localize(datetime.datetime(year, month, day, hour, minute))
+		start2 = tz.localize(datetime.datetime(year, month, day, hour2, minute2))
 		if start2 < start:
 			start2 += datetime.timedelta(days=1)
 		delta = start2 - start
-		stop = datetime.datetime(year2, month2, day2, 0, 0, tzinfo=tz)
+		stop = tz.localize(datetime.datetime(year2, month2, day2, 0, 0))
 		rule = rrule.rrule(rrule.WEEKLY,interval=interval, byweekday=wd, dtstart=start, until=stop)
 		for event in rule:
 			event_end = event+delta
