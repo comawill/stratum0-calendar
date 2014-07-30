@@ -104,10 +104,10 @@ class DatePrinter(object):
 		return None
 
 	def __lt__(self, other):
-		return other > self.getStartDate()
+		return other > self.getEndDate()
 
 	def __gt__(self, other):
-		return other < self.getEndDate()
+		return other < self.getStartDate()
 
 
 class SingleDate(DatePrinter):
