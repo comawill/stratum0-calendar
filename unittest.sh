@@ -1,2 +1,2 @@
 #!/bin/bash
-python -m unittest -v tests
+nosetests -v
