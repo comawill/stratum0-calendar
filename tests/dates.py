@@ -22,38 +22,38 @@ class TestDateOrder(unittest.TestCase):
 		self.assertEqual(self.sd1.getMediawikiEntry(), "* Mi, 20.08.: name")
 		self.assertEqual(self.sd1.getMediawikiName(), "name")
 		
-		self.assertLess(self.sd1, self.sd2)
-		self.assertGreater(self.sd2, self.sd1)
+		self.assertTrue(self.sd1 < self.sd2)
+		self.assertTrue(self.sd2 > self.sd1)
 
 	def test_SingleDateTime(self):
 		
 		self.assertEqual(self.sdt1.getMediawikiEntry(), "* Fr, 22.08. 12:00: name")
 		self.assertEqual(self.sdt1.getMediawikiName(), "name")
 		
-		self.assertLess(self.sdt1, self.sdt2)
-		self.assertGreater(self.sdt2, self.sdt1)
+		self.assertTrue(self.sdt1 < self.sdt2)
+		self.assertTrue(self.sdt2 > self.sdt1)
 
 	def test_SingleDateTimeRange(self):
 
 		self.assertEqual(self.sdtr1.getMediawikiEntry(), "* So, 24.08. 12:00 - 14:00: name")
 		self.assertEqual(self.sdtr1.getMediawikiName(), "name")
 		
-		self.assertLess(self.sdtr1, self.sdtr2)
-		self.assertGreater(self.sdtr2, self.sdtr1)
+		self.assertTrue(self.sdtr1 < self.sdtr2)
+		self.assertTrue(self.sdtr2 > self.sdtr1)
 
 	def test_DateRange(self):
 
 		self.assertEqual(self.dr1.getMediawikiEntry(), "* Mi, 20.08. bis Do, 21.08.: name")
 		self.assertEqual(self.dr1.getMediawikiName(), "name")
 		
-		self.assertLess(self.dr1, self.dr2)
-		self.assertGreater(self.dr2, self.dr1)
+		self.assertTrue(self.dr1 < self.dr2)
+		self.assertTrue(self.dr2 > self.dr1)
 
 	def test_DateTimeRange(self):
 		
 		self.assertEqual(self.dtr1.getMediawikiEntry(), "* Mi, 20.08. 12:00 bis Do, 21.08. 14:00: name")
 		self.assertEqual(self.dtr1.getMediawikiName(), "name")
 		
-		self.assertLess(self.dtr1, self.dtr2)
-		self.assertGreater(self.dtr2, self.dtr1)
+		self.assertTrue(self.dtr1 < self.dtr2)
+		self.assertTrue(self.dtr2 > self.dtr1)
 
