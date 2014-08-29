@@ -1,1 +1,1 @@
-mwclient>=0.7dev
+git+git://github.com/mwclient/mwclient.git
