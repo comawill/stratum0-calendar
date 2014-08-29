@@ -48,10 +48,11 @@ def make_extern(intern_url):
 	return "https://stratum0.org/wiki/%s" % intern_url.replace(" ", "_")
 
 class DatePrinter(object):
-	def __init__(self, name):
+	def __init__(self, name, start_date, end_date):
 		self.name = name
 		self.rule = None
-		pass
+		self.start_date = start_date
+		self.end_date = end_date
 
 	def getIcal(self):
 		event = ical.Event()
@@ -59,19 +60,13 @@ class DatePrinter(object):
 		url = self.getURL()
 		if url:
 			event.add('url', url.encode("utf8"))
-		event.add('dtstart', self.getStartDate())
-		event.add('dtend', self.getEndDate())
+		event.add('dtstart', self.start_date)
+		event.add('dtend', self.end_date)
 		return event
 	
 	def getMediawikiEntry(self):
 		raise Exception("not implemented")
 	
-	def getStartDate(self):
-		raise Exception("not implemented")
-
-	def getEndDate(self):
-		raise Exception("not implemented")
-
 	def getMediawikiName(self):
 		return self.name
 
@@ -109,97 +104,73 @@ class DatePrinter(object):
 		return None
 
 	def __lt__(self, other):
-		return other > self.getEndDate()
+		return other > self.start_date
 
 	def __gt__(self, other):
-		return other < self.getStartDate()
+		return other < self.end_date
 
 
 class SingleDate(DatePrinter):
 	def __init__(self, name, values):
-		DatePrinter.__init__(self, name)
 		day, month, year = map(int, values)
-		self.date = tz.localize(datetime.datetime(year, month, day, 0 , 0))
+		date = tz.localize(datetime.datetime(year, month, day, 0 , 0))
+		date_end = date + datetime.timedelta(days=1)
+		DatePrinter.__init__(self, name, date, date_end)
 	
 	def getMediawikiEntry(self):
-		dow = DOW_STR[self.date.weekday()]
-		return "* %s, %02d.%02d.: %s" % (dow, self.date.day, self.date.month, self.getMediawikiName())
+		dow = DOW_STR[self.start_date.weekday()]
+		return "* %s, %02d.%02d.: %s" % (dow, self.start_date.day, self.start_date.month, self.getMediawikiName())
 
-	def getStartDate(self):
-		return self.date
-	
-	def getEndDate(self):
-		return self.date + datetime.timedelta(days=1)
 
 class SingleDateTime(DatePrinter):
 	def __init__(self, name, values):
-		DatePrinter.__init__(self, name)
 		day, month, year, hour, minute = map(int, values)
-		self.date = tz.localize(datetime.datetime(year, month, day, hour, minute))
+		date = tz.localize(datetime.datetime(year, month, day, hour, minute))
+		date_end = date + datetime.timedelta(hours=DEFAULT_DURATION)
+		DatePrinter.__init__(self, name, date, date_end)
 	
 	def getMediawikiEntry(self):
-		dow = DOW_STR[self.date.weekday()]
-		return "* %s, %02d.%02d. %02d:%02d: %s" % (dow, self.date.day, self.date.month, self.date.hour, self.date.minute, self.getMediawikiName())
+		dow = DOW_STR[self.start_date.weekday()]
+		return "* %s, %02d.%02d. %02d:%02d: %s" % (dow, self.start_date.day, self.start_date.month, self.start_date.hour, self.start_date.minute, self.getMediawikiName())
 
-	def getStartDate(self):
-		return self.date
-
-	def getEndDate(self):
-		return self.date + datetime.timedelta(hours=DEFAULT_DURATION)
 
 class SingleDateTimeRange(DatePrinter):
 	def __init__(self, name, values):
-		DatePrinter.__init__(self, name)
 		day, month, year, hour, minute, hour2, minute2 = map(int, values)
-		self.date = tz.localize(datetime.datetime(year, month, day, hour, minute))
-		self.date2 = tz.localize(datetime.datetime(year, month, day, hour2, minute2))
+		date = tz.localize(datetime.datetime(year, month, day, hour, minute))
+		date_end = tz.localize(datetime.datetime(year, month, day, hour2, minute2))
+		DatePrinter.__init__(self, name, date, date_end)
 	
 	def getMediawikiEntry(self):
-		dow = DOW_STR[self.date.weekday()]
-		return "* %s, %02d.%02d. %02d:%02d - %02d:%02d: %s" % (dow, self.date.day, self.date.month, self.date.hour, self.date.minute, self.date2.hour, self.date2.minute, self.getMediawikiName())
-
-	def getStartDate(self):
-		return self.date
-
-	def getEndDate(self):
-		return self.date2
+		dow = DOW_STR[self.start_date.weekday()]
+		return "* %s, %02d.%02d. %02d:%02d - %02d:%02d: %s" % (dow, self.start_date.day, self.start_date.month, self.start_date.hour, self.start_date.minute, self.end_date.hour, self.end_date.minute, self.getMediawikiName())
 
 
 class DateRange(DatePrinter):
 	def __init__(self, name, values):
-		DatePrinter.__init__(self, name)
 		day, month, year, day2, month2, year2 = map(int, values)
-		self.date = tz.localize(datetime.datetime(year, month, day, 0, 0))
-		self.date2 = tz.localize(datetime.datetime(year2, month2, day2, 0, 0))
+		date = tz.localize(datetime.datetime(year, month, day, 0, 0))
+		date_end = tz.localize(datetime.datetime(year2, month2, day2, 0, 0))
+		DatePrinter.__init__(self, name, date, date_end)
 	
 	def getMediawikiEntry(self):
-		dow = DOW_STR[self.date.weekday()]
-		dow2 = DOW_STR[self.date2.weekday()]
-		return "* %s, %02d.%02d. bis %s, %02d.%02d.: %s" % (dow, self.date.day, self.date.month, dow2, self.date2.day, self.date2.month, self.getMediawikiName())
+		dow = DOW_STR[self.start_date.weekday()]
+		dow2 = DOW_STR[self.end_date.weekday()]
+		return "* %s, %02d.%02d. bis %s, %02d.%02d.: %s" % (dow, self.start_date.day, self.start_date.month, dow2, self.end_date.day, self.end_date.month, self.getMediawikiName())
 
-	def getStartDate(self):
-		return self.date
 
-	def getEndDate(self):
-		return self.date2 + datetime.timedelta(days=1)
-
-class DateRangeTime(DatePrinter):
+class DateTimeRange(DatePrinter):
 	def __init__(self, name, values):
-		DatePrinter.__init__(self, name)
 		day, month, year, hour, minute, day2, month2, year2, hour2, minute2 = map(int, values)
-		self.date = tz.localize(datetime.datetime(year, month, day, hour, minute))
-		self.date2 = tz.localize(datetime.datetime(year2, month2, day2, hour2, minute2))
+		date = tz.localize(datetime.datetime(year, month, day, hour, minute))
+		date_end = tz.localize(datetime.datetime(year2, month2, day2, hour2, minute2))
+		DatePrinter.__init__(self, name, date, date_end)
 	
 	def getMediawikiEntry(self):
-		dow = DOW_STR[self.date.weekday()]
-		dow2 = DOW_STR[self.date2.weekday()]
-		return "* %s, %02d.%02d. %02d:%02d bis %s, %02d.%02d. %02d:%02d: %s" % (dow, self.date.day, self.date.month, self.date.hour, self.date.minute, dow2, self.date2.day, self.date2.month, self.date2.hour, self.date2.minute, self.getMediawikiName())\
+		dow = DOW_STR[self.start_date.weekday()]
+		dow2 = DOW_STR[self.end_date.weekday()]
+		return "* %s, %02d.%02d. %02d:%02d bis %s, %02d.%02d. %02d:%02d: %s" % (dow, self.start_date.day, self.start_date.month, self.start_date.hour, self.start_date.minute, dow2, self.end_date.day, self.end_date.month, self.end_date.hour, self.end_date.minute, self.getMediawikiName())
 
-	def getStartDate(self):
-		return self.date
-
-	def getEndDate(self):
-		return self.date2
 
 class Generator:
 	def __init__(self):
@@ -267,9 +238,9 @@ class RepSingleDateTimeRange(SingleDateTimeRange):
 	def __init__(self, name, values, rule):
 		SingleDateTimeRange.__init__(self, name, values)
 		self.rule = rule
-class RepDateRangeTime(DateRangeTime):
+class RepDateTimeRange(DateTimeRange):
 	def __init__(self, name, values, rule):
-		DateRangeTime.__init__(self, name, values)
+		DateTimeRange.__init__(self, name, values)
 		self.rule = rule
 
 class WeekdayTimeGenerator(WeekdayTimeRangeGenerator):
@@ -282,7 +253,7 @@ tests = [(single_date, SingleDate),
 		(single_date_time, SingleDateTime),
 		(single_date_time_range, SingleDateTimeRange),
 		(date_range, DateRange),
-		(date_range_time, DateRangeTime),
+		(date_range_time, DateTimeRange),
 		(weekday_time, WeekdayTimeGenerator),
 		(weekday_time_range, WeekdayTimeRangeGenerator)]
 
@@ -317,7 +288,7 @@ def next_up(entries):
 	now = now_-datetime.timedelta(hours=1)
 	result = []
 	for entry in sorted(entries):
-		if entry.getEndDate() > now:
+		if entry.end_date > now:
 			# detect repeating events by nameyy
 			eventid = entry.getPlainName()
 			if eventid not in repeated_events:
@@ -337,7 +308,7 @@ def in_before(entries):
 	lowest = now_-datetime.timedelta(days=31)
 	result = []
 	for entry in sorted(entries, reverse=True):
-		if entry.getEndDate() < now  and entry.getEndDate() > lowest:
+		if entry.end_date < now  and entry.end_date > lowest:
 			# detect repeating events by nameyy
 			eventid = entry.getPlainName()
 			if eventid not in repeated_events:
