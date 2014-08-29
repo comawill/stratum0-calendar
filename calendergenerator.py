@@ -19,7 +19,7 @@ date_range_time = re.compile("^(\d+)\.(\d+)\.(\d+)\s+(\d+)[:\.](\d+)\s*\-\s*(\d+
 weekday_time = re.compile("^([a-zA-Z0-9]+),?\s*(\d+)[:\.](\d+)$")
 weekday_time_range = re.compile("^([a-zA-Z0-9]+),?\s*(\d+)[:\.](\d+)\s*\-\s*(\d+)[:\.](\d+)$")
 
-mediawiki_intern_link = re.compile(r"(\[\[(.*?)\|?(.*)\]\])")
+mediawiki_intern_link = re.compile(r"(\[\[([^|]+)\|?(.*)\]\])")
 mediawiki_extern_link = re.compile(r"(\[([^\ ]+)\s+(.*)\])")
 
 dow_regex = re.compile(r"^((\d+)x|)(\w+)")
@@ -76,7 +76,12 @@ class DatePrinter(object):
 		return self.name
 
 	def getPlainName(self):
-		name = mediawiki_intern_link.sub(r"\3", self.name)
+		def fix_intern(match):
+			_, url, name = match.groups()
+			if name:
+				return name
+			return url
+		name = mediawiki_intern_link.sub(fix_intern, self.name)
 		name = mediawiki_extern_link.sub(r"\3", name)
 		return name
 
