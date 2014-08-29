@@ -26,5 +26,8 @@ if old != text:
 		comment = u"%s hat Termine aktualisiert (%s) " % (rev["user"] ,rev["comment"])
 	print "update!"
 	print comment.encode("utf8")
+	print
+	print text.encode("utf8")
+	
 	site.login(config.user, config.password)
 	hauptseite.save(text, comment, minor=True)
