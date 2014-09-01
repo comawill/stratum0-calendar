@@ -1,2 +1,2 @@
 #!/bin/bash
-nosetests -v
+nosetests -vs -w tests

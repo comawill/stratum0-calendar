@@ -5,6 +5,7 @@ import datetime
 from dateutil import rrule
 import icalendar as ical
 import pytz
+import calendar
 
 tz = pytz.timezone('Europe/Berlin')
 
@@ -38,11 +39,27 @@ dow_index = {"mo":0,
 	"so":6,
 	"sun":6}
 
-DOW_STR = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
 
 DEFAULT_DURATION = 3 #3h
 MAX_NEXT_UP_REPEATED = 3
 MAX_IN_BEFORE_REPEATED = 1
+
+def day_of_week_str(day_of_week, lang):
+	with calendar.TimeEncoding(lang):
+		return calendar.day_abbr[day_of_week]
+
+def short_lang(lang):
+	return lang.split("_")[0]
+
+def to_in_lang(lang):
+	slang = short_lang(lang)
+	if slang == "en":
+		return "to"
+	elif slang == "de":
+		return "bis"
+	elif slang == "fr":
+		return u"à"
+	return "--"
 
 def make_extern(intern_url):
 	return "https://stratum0.org/wiki/%s" % intern_url.replace(" ", "_")
@@ -64,7 +81,7 @@ class DatePrinter(object):
 		event.add('dtend', self.end_date)
 		return event
 	
-	def getMediawikiEntry(self):
+	def getMediawikiEntry(self, lang="de_de"):
 		raise Exception("not implemented")
 	
 	def getMediawikiName(self):
@@ -117,8 +134,8 @@ class SingleDate(DatePrinter):
 		date_end = date + datetime.timedelta(days=1)
 		DatePrinter.__init__(self, name, date, date_end)
 	
-	def getMediawikiEntry(self):
-		dow = DOW_STR[self.start_date.weekday()]
+	def getMediawikiEntry(self, lang="de_de"):
+		dow = day_of_week_str(self.start_date.weekday(), lang)
 		return "* %s, %02d.%02d.: %s" % (dow, self.start_date.day, self.start_date.month, self.getMediawikiName())
 
 
@@ -129,8 +146,8 @@ class SingleDateTime(DatePrinter):
 		date_end = date + datetime.timedelta(hours=DEFAULT_DURATION)
 		DatePrinter.__init__(self, name, date, date_end)
 	
-	def getMediawikiEntry(self):
-		dow = DOW_STR[self.start_date.weekday()]
+	def getMediawikiEntry(self, lang="de_de"):
+		dow = day_of_week_str(self.start_date.weekday(), lang)
 		return "* %s, %02d.%02d. %02d:%02d: %s" % (dow, self.start_date.day, self.start_date.month, self.start_date.hour, self.start_date.minute, self.getMediawikiName())
 
 
@@ -141,8 +158,8 @@ class SingleDateTimeRange(DatePrinter):
 		date_end = tz.localize(datetime.datetime(year, month, day, hour2, minute2))
 		DatePrinter.__init__(self, name, date, date_end)
 	
-	def getMediawikiEntry(self):
-		dow = DOW_STR[self.start_date.weekday()]
+	def getMediawikiEntry(self, lang="de_de"):
+		dow = day_of_week_str(self.start_date.weekday(), lang)
 		return "* %s, %02d.%02d. %02d:%02d - %02d:%02d: %s" % (dow, self.start_date.day, self.start_date.month, self.start_date.hour, self.start_date.minute, self.end_date.hour, self.end_date.minute, self.getMediawikiName())
 
 
@@ -153,10 +170,11 @@ class DateRange(DatePrinter):
 		date_end = tz.localize(datetime.datetime(year2, month2, day2, 0, 0))
 		DatePrinter.__init__(self, name, date, date_end)
 	
-	def getMediawikiEntry(self):
-		dow = DOW_STR[self.start_date.weekday()]
-		dow2 = DOW_STR[self.end_date.weekday()]
-		return "* %s, %02d.%02d. bis %s, %02d.%02d.: %s" % (dow, self.start_date.day, self.start_date.month, dow2, self.end_date.day, self.end_date.month, self.getMediawikiName())
+	def getMediawikiEntry(self, lang="de_de"):
+		dow = day_of_week_str(self.start_date.weekday(), lang)
+		dow2 = day_of_week_str(self.end_date.weekday(), lang)
+		to = to_in_lang(lang)
+		return "* %s, %02d.%02d. %s %s, %02d.%02d.: %s" % (dow, self.start_date.day, self.start_date.month, to, dow2, self.end_date.day, self.end_date.month, self.getMediawikiName())
 
 
 class DateTimeRange(DatePrinter):
@@ -166,10 +184,11 @@ class DateTimeRange(DatePrinter):
 		date_end = tz.localize(datetime.datetime(year2, month2, day2, hour2, minute2))
 		DatePrinter.__init__(self, name, date, date_end)
 	
-	def getMediawikiEntry(self):
-		dow = DOW_STR[self.start_date.weekday()]
-		dow2 = DOW_STR[self.end_date.weekday()]
-		return "* %s, %02d.%02d. %02d:%02d bis %s, %02d.%02d. %02d:%02d: %s" % (dow, self.start_date.day, self.start_date.month, self.start_date.hour, self.start_date.minute, dow2, self.end_date.day, self.end_date.month, self.end_date.hour, self.end_date.minute, self.getMediawikiName())
+	def getMediawikiEntry(self, lang="de_de"):
+		dow = day_of_week_str(self.start_date.weekday(), lang)
+		dow2 = day_of_week_str(self.end_date.weekday(), lang)
+		to = to_in_lang(lang)
+		return "* %s, %02d.%02d. %02d:%02d %s %s, %02d.%02d. %02d:%02d: %s" % (dow, self.start_date.day, self.start_date.month, self.start_date.hour, self.start_date.minute, to, dow2, self.end_date.day, self.end_date.month, self.end_date.hour, self.end_date.minute, self.getMediawikiName())
 
 
 class Generator:
@@ -321,20 +340,15 @@ def in_before(entries):
 			
 	return result
 
-def generate_wiki_section(entries):
-	result = []
-	result.append("=== '''Aktuelles''' ===")
-	result.append(u"<!-- Automatisch Generierter Content fängt hier an  -->")
-	result.append("----")
-	result.append("''siehe auch [[Kalender]] und [[:Kategorie:Termine]] <div style=\"float:right\">[[Termine| Termine verwalten]] (beta)</div>''")
+def generate_wiki_section(entries, templatefile, lang="de_de"):
+	result = file(templatefile).read().decode("utf8")
+	next_dates = []
 	for i in next_up(entries):
-		result.append(i.getMediawikiEntry())
-	result.append("----")
-	result.append("")
-	result.append("==== Neulich: ====")
-	result.append("''siehe auch [[Timeline]]''")
+		next_dates.append(i.getMediawikiEntry(lang=lang))
+	next_dates = "\n".join(next_dates)
+	prev_dates = []
 	for i in in_before(entries):
-		result.append(i.getMediawikiEntry())
-	result.append("| style=\"vertical-align: top; width: 20%; padding: 5px; border: 2px solid #dfdfdf;\" |")
-	result.append(u"<!-- Automatisch Generierter Content hört hier auf  -->")
-	return "\n".join(result)
+		prev_dates.append(i.getMediawikiEntry(lang=lang))
+	prev_dates = "\n".join(prev_dates)
+	result = result.format(next_dates=next_dates, prev_dates=prev_dates)
+	return result
