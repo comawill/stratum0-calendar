@@ -44,6 +44,12 @@ DEFAULT_DURATION = 3 #3h
 MAX_NEXT_UP_REPEATED = 3
 MAX_IN_BEFORE_REPEATED = 1
 
+
+
+LANG_DE = "de_DE.UTF-8"
+LANG_EN = "en_US.UTF-8"
+LANG_FR = "fr_CA.UTF-8"
+
 def day_of_week_str(day_of_week, lang):
 	with calendar.TimeEncoding(lang):
 		return calendar.day_abbr[day_of_week].title()
@@ -81,7 +87,7 @@ class DatePrinter(object):
 		event.add('dtend', self.end_date)
 		return event
 	
-	def getMediawikiEntry(self, lang="de_DE"):
+	def getMediawikiEntry(self, lang=LANG_DE):
 		raise Exception("not implemented")
 	
 	def getMediawikiName(self):
@@ -134,7 +140,7 @@ class SingleDate(DatePrinter):
 		date_end = date + datetime.timedelta(days=1)
 		DatePrinter.__init__(self, name, date, date_end)
 	
-	def getMediawikiEntry(self, lang="de_DE"):
+	def getMediawikiEntry(self, lang=LANG_DE):
 		dow = day_of_week_str(self.start_date.weekday(), lang)
 		return "* %s, %02d.%02d.: %s" % (dow, self.start_date.day, self.start_date.month, self.getMediawikiName())
 
@@ -146,7 +152,7 @@ class SingleDateTime(DatePrinter):
 		date_end = date + datetime.timedelta(hours=DEFAULT_DURATION)
 		DatePrinter.__init__(self, name, date, date_end)
 	
-	def getMediawikiEntry(self, lang="de_DE"):
+	def getMediawikiEntry(self, lang=LANG_DE):
 		dow = day_of_week_str(self.start_date.weekday(), lang)
 		return "* %s, %02d.%02d. %02d:%02d: %s" % (dow, self.start_date.day, self.start_date.month, self.start_date.hour, self.start_date.minute, self.getMediawikiName())
 
@@ -158,7 +164,7 @@ class SingleDateTimeRange(DatePrinter):
 		date_end = tz.localize(datetime.datetime(year, month, day, hour2, minute2))
 		DatePrinter.__init__(self, name, date, date_end)
 	
-	def getMediawikiEntry(self, lang="de_DE"):
+	def getMediawikiEntry(self, lang=LANG_DE):
 		dow = day_of_week_str(self.start_date.weekday(), lang)
 		return "* %s, %02d.%02d. %02d:%02d - %02d:%02d: %s" % (dow, self.start_date.day, self.start_date.month, self.start_date.hour, self.start_date.minute, self.end_date.hour, self.end_date.minute, self.getMediawikiName())
 
@@ -170,7 +176,7 @@ class DateRange(DatePrinter):
 		date_end = tz.localize(datetime.datetime(year2, month2, day2, 0, 0))
 		DatePrinter.__init__(self, name, date, date_end)
 	
-	def getMediawikiEntry(self, lang="de_DE"):
+	def getMediawikiEntry(self, lang=LANG_DE):
 		dow = day_of_week_str(self.start_date.weekday(), lang)
 		dow2 = day_of_week_str(self.end_date.weekday(), lang)
 		to = to_in_lang(lang)
@@ -184,7 +190,7 @@ class DateTimeRange(DatePrinter):
 		date_end = tz.localize(datetime.datetime(year2, month2, day2, hour2, minute2))
 		DatePrinter.__init__(self, name, date, date_end)
 	
-	def getMediawikiEntry(self, lang="de_DE"):
+	def getMediawikiEntry(self, lang=LANG_DE):
 		dow = day_of_week_str(self.start_date.weekday(), lang)
 		dow2 = day_of_week_str(self.end_date.weekday(), lang)
 		to = to_in_lang(lang)
@@ -340,7 +346,7 @@ def in_before(entries):
 			
 	return result
 
-def generate_wiki_section(entries, templatefile, lang="de_DE"):
+def generate_wiki_section(entries, templatefile, lang=LANG_DE):
 	result = file(templatefile).read().decode("utf8")
 	next_dates = []
 	for i in next_up(entries):

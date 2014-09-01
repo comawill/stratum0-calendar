@@ -20,7 +20,7 @@ class TestDateOrder(unittest.TestCase):
 	def test_SingleDate(self):
 
 		self.assertEqual(self.sd1.getMediawikiEntry(), "* Mi, 20.08.: name")
-		self.assertEqual(self.sd1.getMediawikiEntry(lang="en_US"), "* Wed, 20.08.: name")
+		self.assertEqual(self.sd1.getMediawikiEntry(lang=cg.LANG_EN), "* Wed, 20.08.: name")
 		self.assertEqual(self.sd1.getMediawikiName(), "name")
 		
 		self.assertTrue(self.sd1 < self.sd2)
@@ -29,7 +29,7 @@ class TestDateOrder(unittest.TestCase):
 	def test_SingleDateTime(self):
 		
 		self.assertEqual(self.sdt1.getMediawikiEntry(), "* Fr, 22.08. 12:00: name")
-		self.assertEqual(self.sdt1.getMediawikiEntry(lang="en_US"), "* Fri, 22.08. 12:00: name")
+		self.assertEqual(self.sdt1.getMediawikiEntry(lang=cg.LANG_EN), "* Fri, 22.08. 12:00: name")
 		self.assertEqual(self.sdt1.getMediawikiName(), "name")
 		
 		self.assertTrue(self.sdt1 < self.sdt2)
@@ -38,7 +38,7 @@ class TestDateOrder(unittest.TestCase):
 	def test_SingleDateTimeRange(self):
 
 		self.assertEqual(self.sdtr1.getMediawikiEntry(), "* So, 24.08. 12:00 - 14:00: name")
-		self.assertEqual(self.sdtr1.getMediawikiEntry(lang="en_US"), "* Sun, 24.08. 12:00 - 14:00: name")
+		self.assertEqual(self.sdtr1.getMediawikiEntry(lang=cg.LANG_EN), "* Sun, 24.08. 12:00 - 14:00: name")
 		self.assertEqual(self.sdtr1.getMediawikiName(), "name")
 		
 		self.assertTrue(self.sdtr1 < self.sdtr2)
@@ -47,7 +47,7 @@ class TestDateOrder(unittest.TestCase):
 	def test_DateRange(self):
 
 		self.assertEqual(self.dr1.getMediawikiEntry(), "* Mi, 20.08. bis Do, 21.08.: name")
-		self.assertEqual(self.dr1.getMediawikiEntry(lang="en_US"), "* Wed, 20.08. to Thu, 21.08.: name")
+		self.assertEqual(self.dr1.getMediawikiEntry(lang=cg.LANG_EN), "* Wed, 20.08. to Thu, 21.08.: name")
 		self.assertEqual(self.dr1.getMediawikiName(), "name")
 		
 		self.assertTrue(self.dr1 < self.dr2)
@@ -56,7 +56,7 @@ class TestDateOrder(unittest.TestCase):
 	def test_DateTimeRange(self):
 		
 		self.assertEqual(self.dtr1.getMediawikiEntry(), "* Mi, 20.08. 12:00 bis Do, 21.08. 14:00: name")
-		self.assertEqual(self.dtr1.getMediawikiEntry(lang="en_US"), "* Wed, 20.08. 12:00 to Thu, 21.08. 14:00: name")
+		self.assertEqual(self.dtr1.getMediawikiEntry(lang=cg.LANG_EN), "* Wed, 20.08. 12:00 to Thu, 21.08. 14:00: name")
 		self.assertEqual(self.dtr1.getMediawikiName(), "name")
 		
 		self.assertTrue(self.dtr1 < self.dtr2)

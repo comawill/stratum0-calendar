@@ -31,6 +31,6 @@ def update(entries, page, templatefile, lang):
 			site.login(config.user, config.password)
 		page_data.save(text, comment, minor=True)
 
-update(entries, "Template:Termine/de", "templates/termine_haupt.de.wiki", "de_DE")
-update(entries, "Template:Termine/en", "templates/termine_haupt.en.wiki", "en_US")
-update(entries, "Template:Termine/fr", "templates/termine_haupt.fr.wiki", "fr_CA")
+update(entries, "Template:Termine/de", "templates/termine_haupt.de.wiki", calendergenerator.LANG_DE)
+update(entries, "Template:Termine/en", "templates/termine_haupt.en.wiki", calendergenerator.LANG_EN)
+update(entries, "Template:Termine/fr", "templates/termine_haupt.fr.wiki", calendergenerator.LANG_FR)

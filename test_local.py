@@ -13,8 +13,8 @@ data = termine.edit()
 #data = file("tests/2014.txt").read().decode("utf8")
 parsed = calendergenerator.parse_wiki_page(data)
 
-print calendergenerator.generate_wiki_section(parsed, "templates/termine_haupt.de.wiki", "de_DE")
+print calendergenerator.generate_wiki_section(parsed, "templates/termine_haupt.de.wiki", calendergenerator.LANG_DE)
 print "-"*20
-print calendergenerator.generate_wiki_section(parsed, "templates/termine_haupt.en.wiki", "en_US")
+print calendergenerator.generate_wiki_section(parsed, "templates/termine_haupt.en.wiki", calendergenerator.LANG_EN)
 print "-"*20
-print calendergenerator.generate_wiki_section(parsed, "templates/termine_haupt.fr.wiki", "fr_CA")
+print calendergenerator.generate_wiki_section(parsed, "templates/termine_haupt.fr.wiki", calendergenerator.LANG_FR)
