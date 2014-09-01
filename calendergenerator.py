@@ -46,7 +46,7 @@ MAX_IN_BEFORE_REPEATED = 1
 
 def day_of_week_str(day_of_week, lang):
 	with calendar.TimeEncoding(lang):
-		return calendar.day_abbr[day_of_week]
+		return calendar.day_abbr[day_of_week].title()
 
 def short_lang(lang):
 	return lang.split("_")[0]

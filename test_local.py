@@ -17,4 +17,4 @@ print calendergenerator.generate_wiki_section(parsed, "templates/termine_haupt.d
 print "-"*20
 print calendergenerator.generate_wiki_section(parsed, "templates/termine_haupt.en.wiki", "en_US")
 print "-"*20
-print calendergenerator.generate_wiki_section(parsed, "templates/termine_haupt.fr.wiki", "fr_FR")
+print calendergenerator.generate_wiki_section(parsed, "templates/termine_haupt.fr.wiki", "fr_CA")

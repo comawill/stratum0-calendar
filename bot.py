@@ -33,4 +33,4 @@ def update(entries, page, templatefile, lang):
 
 update(entries, "Template:Termine/de", "templates/termine_haupt.de.wiki", "de_DE")
 update(entries, "Template:Termine/en", "templates/termine_haupt.en.wiki", "en_US")
-update(entries, "Template:Termine/fr", "templates/termine_haupt.fr.wiki", "fr_FR")
+update(entries, "Template:Termine/fr", "templates/termine_haupt.fr.wiki", "fr_CA")
