@@ -1,0 +1,10 @@
+<!-- automatically generated content starts here -->
+=== '''Événements à venir''' ===
+----
+''<div style="float:right">[[Termine|gérer des événements]]</div>''
+{next_dates}
+----
+
+==== antérieur: ====
+{prev_dates}
+<!-- automatically generated content ends here -->

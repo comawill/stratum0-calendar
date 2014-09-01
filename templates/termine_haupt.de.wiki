@@ -1,0 +1,11 @@
+<!-- automatisch generierter Content fängt hier an -->
+=== '''Aktuelles''' ===
+----
+''siehe auch [[Kalender]] und [[:Kategorie:Termine]] <div style="float:right">[[Termine| Termine verwalten]] (beta)</div>''
+{next_dates}
+----
+
+==== Neulich: ====
+''siehe auch [[Timeline]]''
+{prev_dates}
+<!-- automatisch generierter Content hört hier auf -->
