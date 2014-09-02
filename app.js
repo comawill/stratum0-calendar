@@ -38,3 +38,8 @@
 	});
 
 }(jQuery));
+
+function enhance_event(event) {
+	data = event.split(": ", 2);
+	return data[0] + ": <strong>" + data[1] + "</strong>"
+}
