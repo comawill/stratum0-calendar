@@ -43,3 +43,8 @@ function enhance_event(event) {
 	data = event.split(": ", 2);
 	return data[0] + ": <strong>" + data[1] + "</strong>"
 }
+
+function short_event(event) {
+	data = event.split(": ", 2);
+	return data[1];
+}

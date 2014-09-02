@@ -34,7 +34,10 @@ if __name__ == "__main__":
 		print json.dumps(result).encode("utf8")
 	css_content = ""
 	for group in css:
-		css_content += ".%s { background-color: #%s; }\n" % (group, md5.new(group).hexdigest()[:3])
+		color = md5.new(group).hexdigest()[:3]
+		css_content += ".%s { background-color: #%s; }\n" % (group, color)
+		css_content += ".dh-%s {background-color: #%s; }\n" % (group, color)
+
 	if len(sys.argv) > 2:
 		f = file(sys.argv[2], "w")
 		f.write(css_content)
