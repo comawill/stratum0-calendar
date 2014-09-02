@@ -1,0 +1,25 @@
+.modal {
+    width: 80%; /* respsonsive width */
+    margin-left:-40%; /* width/2) */ 
+}
+
+#cal-slide-box {
+  background-color: #fff;
+  border-bottom: 1px solid #E1E1E1;
+}
+#cal-slide-content {
+  padding: 20px;
+  color: #000;
+  background-image: none;
+  background-color: #fff;
+  -webkit-box-shadow: none;
+  box-shadow: none; 
+}
+
+#cal-slide-tick {
+    background-image: url('img/tick.png?2');
+}
+
+#cal-slide-content a.event-item {
+  color: #000;
+}
