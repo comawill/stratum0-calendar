@@ -4,6 +4,7 @@ import calendargenerator
 import mwclient
 import sys
 import json
+import md5
 
 if __name__ == "__main__":
 
@@ -12,8 +13,13 @@ if __name__ == "__main__":
 	
 	entries = calendargenerator.parse_wiki_page(termine.edit())
 	e = []
+	css = []
 	for entry in entries:
-		e.append(entry.getJson())
+		data = entry.getJson()
+		group = data["class"]
+		if group not in css:
+			css.append(group)
+		e.append(data)
 	
 	result = {
 			"success": 1,
@@ -26,3 +32,12 @@ if __name__ == "__main__":
 		f.close()
 	else:
 		print json.dumps(result).encode("utf8")
+	css_content = ""
+	for group in css:
+		css_content += ".%s { background-color: #%s; }\n" % (group, md5.new(group).hexdigest()[:3])
+	if len(sys.argv) > 2:
+		f = file(sys.argv[2], "w")
+		f.write(css_content)
+		f.close()
+	else:
+		print css_content

@@ -2,20 +2,20 @@ import unittest
 import calendargenerator as cg
 class TestDateOrder(unittest.TestCase):
 	def setUp(self):
-		self.sd1 = cg.SingleDate("name", [20,8,2014])
-		self.sd2 = cg.SingleDate("name", [21,8,2014])
+		self.sd1 = cg.SingleDate("name", "cat", [20,8,2014])
+		self.sd2 = cg.SingleDate("name", "cat", [21,8,2014])
 
-		self.sdt1 = cg.SingleDateTime("name", [22,8,2014,12,00])
-		self.sdt2 = cg.SingleDateTime("name", [23,8,2014,14,00])
+		self.sdt1 = cg.SingleDateTime("name", "cat", [22,8,2014,12,00])
+		self.sdt2 = cg.SingleDateTime("name", "cat", [23,8,2014,14,00])
 		
-		self.sdtr1 = cg.SingleDateTimeRange("name", [24,8,2014,12,00, 14,00])
-		self.sdtr2 = cg.SingleDateTimeRange("name", [24,9,2014,13,00, 15,00])
+		self.sdtr1 = cg.SingleDateTimeRange("name", "cat", [24,8,2014,12,00, 14,00])
+		self.sdtr2 = cg.SingleDateTimeRange("name", "cat", [24,9,2014,13,00, 15,00])
 
-		self.dr1 = cg.DateRange("name", [20,8,2014,21,8,2014])
-		self.dr2 = cg.DateRange("name", [20,9,2014,21,9,2014])
+		self.dr1 = cg.DateRange("name", "cat", [20,8,2014,21,8,2014])
+		self.dr2 = cg.DateRange("name", "cat", [20,9,2014,21,9,2014])
 		
-		self.dtr1 = cg.DateTimeRange("name", [20,8,2014,12,00, 21,8,2014,14,00])
-		self.dtr2 = cg.DateTimeRange("name", [20,9,2014,13,00, 21,8,2014,15,00])
+		self.dtr1 = cg.DateTimeRange("name", "cat", [20,8,2014,12,00, 21,8,2014,14,00])
+		self.dtr2 = cg.DateTimeRange("name", "cat", [20,9,2014,13,00, 21,8,2014,15,00])
 		
 	def test_SingleDate(self):
 

@@ -8,6 +8,7 @@ import icalendar as ical
 import pytz
 import calendar
 import md5
+import string
 
 tz = pytz.timezone('Europe/Berlin')
 
@@ -24,6 +25,9 @@ weekday_time_range = re.compile("^([a-zA-Z0-9/]+),?\s*(\d+)[:\.](\d+)\s*\-\s*(\d
 
 mediawiki_intern_link = re.compile(r"(\[\[([^|]+)\|?(.*)\]\])")
 mediawiki_extern_link = re.compile(r"(\[([^\ ]+)\s+(.*)\])")
+
+category_re = re.compile(r"==([^=]+)==")
+
 
 dow_regex = re.compile(r"^(\w+)(|/(\d+))$")
 dow_index = {"mo":0,
@@ -52,6 +56,15 @@ LANG_DE = "de_DE.UTF-8"
 LANG_EN = "en_US.UTF-8"
 LANG_FR = "fr_CA.UTF-8"
 
+def simple_name(name):
+	name = name.lower()
+	ok = string.digits + string.lowercase
+	new_name = []
+	for char in name:
+		if char in ok:
+			new_name.append(char)
+	return "".join(new_name)
+
 def day_of_week_str(day_of_week, lang):
 	with calendar.TimeEncoding(lang):
 		return calendar.day_abbr[day_of_week].title()
@@ -73,11 +86,12 @@ def make_extern(intern_url):
 	return "https://stratum0.org/wiki/%s" % intern_url.replace(" ", "_")
 
 class DatePrinter(object):
-	def __init__(self, name, start_date, end_date):
+	def __init__(self, name, category, start_date, end_date):
 		self.name = name
 		self.rule = None
 		self.start_date = start_date
 		self.end_date = end_date
+		self.category = category
 
 	def getIcal(self):
 		event = ical.Event()
@@ -94,7 +108,7 @@ class DatePrinter(object):
 		result["id"] = md5.new(self.getPlainName().encode("utf8")).hexdigest()
 		result["title"] = self.getDetailPlain()
 		result["url"] = self.getURL()
-		result["class"] = "event-important"
+		result["class"] = "event-%s" % simple_name(self.category)
 		result["start"] = int(time.mktime(self.start_date.timetuple()) * 1000)
 		result["end"] = int(time.mktime(self.end_date.timetuple()) * 1000)
 		
@@ -150,11 +164,11 @@ class DatePrinter(object):
 
 
 class SingleDate(DatePrinter):
-	def __init__(self, name, values):
+	def __init__(self, name, category, values):
 		day, month, year = map(int, values)
 		date = tz.localize(datetime.datetime(year, month, day, 0 , 0))
 		date_end = date + datetime.timedelta(days=1)
-		DatePrinter.__init__(self, name, date, date_end)
+		DatePrinter.__init__(self, name, category, date, date_end)
 	
 	def getDetailPlain(self, lang=LANG_DE):
 		dow = day_of_week_str(self.start_date.weekday(), lang)
@@ -166,11 +180,11 @@ class SingleDate(DatePrinter):
 
 
 class SingleDateTime(DatePrinter):
-	def __init__(self, name, values):
+	def __init__(self, name, category, values):
 		day, month, year, hour, minute = map(int, values)
 		date = tz.localize(datetime.datetime(year, month, day, hour, minute))
 		date_end = date + datetime.timedelta(hours=DEFAULT_DURATION)
-		DatePrinter.__init__(self, name, date, date_end)
+		DatePrinter.__init__(self, name, category, date, date_end)
 	
 	def getDetailPlain(self, lang=LANG_DE):
 		dow = day_of_week_str(self.start_date.weekday(), lang)
@@ -182,11 +196,11 @@ class SingleDateTime(DatePrinter):
 
 
 class SingleDateTimeRange(DatePrinter):
-	def __init__(self, name, values):
+	def __init__(self, name, category, values):
 		day, month, year, hour, minute, hour2, minute2 = map(int, values)
 		date = tz.localize(datetime.datetime(year, month, day, hour, minute))
 		date_end = tz.localize(datetime.datetime(year, month, day, hour2, minute2))
-		DatePrinter.__init__(self, name, date, date_end)
+		DatePrinter.__init__(self, name, category, date, date_end)
 	
 	def getDetailPlain(self, lang=LANG_DE):
 		dow = day_of_week_str(self.start_date.weekday(), lang)
@@ -198,11 +212,11 @@ class SingleDateTimeRange(DatePrinter):
 
 
 class DateRange(DatePrinter):
-	def __init__(self, name, values):
+	def __init__(self, name, category, values):
 		day, month, year, day2, month2, year2 = map(int, values)
 		date = tz.localize(datetime.datetime(year, month, day, 0, 0))
 		date_end = tz.localize(datetime.datetime(year2, month2, day2, 0, 0))
-		DatePrinter.__init__(self, name, date, date_end)
+		DatePrinter.__init__(self, name, category, date, date_end)
 	
 	def getDetailPlain(self, lang=LANG_DE):
 		dow = day_of_week_str(self.start_date.weekday(), lang)
@@ -218,11 +232,11 @@ class DateRange(DatePrinter):
 
 
 class DateTimeRange(DatePrinter):
-	def __init__(self, name, values):
+	def __init__(self, name, category, values):
 		day, month, year, hour, minute, day2, month2, year2, hour2, minute2 = map(int, values)
 		date = tz.localize(datetime.datetime(year, month, day, hour, minute))
 		date_end = tz.localize(datetime.datetime(year2, month2, day2, hour2, minute2))
-		DatePrinter.__init__(self, name, date, date_end)
+		DatePrinter.__init__(self, name, category, date, date_end)
 	
 	def getDetailPlain(self, lang=LANG_DE):
 		dow = day_of_week_str(self.start_date.weekday(), lang)
@@ -242,7 +256,7 @@ class Generator:
 		pass
 
 class WeekdayTimeRangeGenerator(Generator):
-	def __init__(self, name, values, rep):
+	def __init__(self, name, category, values, rep):
 		Generator.__init__(self)
 		nonetime = False
 		self.entries = []
@@ -285,33 +299,34 @@ class WeekdayTimeRangeGenerator(Generator):
 		for event in rule:
 			event_end = event+delta
 			if nonetime:
-				self.entries.append(RepSingleDateTime(name, (event.day, event.month, event.year, event.hour, event.minute), rule))
+				self.entries.append(RepSingleDateTime(name, category, (event.day, event.month, event.year, event.hour, event.minute), rule))
 			else:
 				if event_end.day != event.day:
-					self.entries.append(RepDateRangeTime(name, (event.day, event.month, event.year, event.hour, event.minute, event_end.day, event_end.month, event_end.year, event_end.hour, event_end.minute), rule))
+					self.entries.append(RepDateRangeTime(name, category, (event.day, event.month, event.year, event.hour, event.minute, event_end.day, event_end.month, event_end.year, event_end.hour, event_end.minute), rule))
 
 				else:
-					self.entries.append(RepSingleDateTimeRange(name, (event.day, event.month, event.year, event.hour, event.minute, event_end.hour, event_end.minute), rule))
+					self.entries.append(RepSingleDateTimeRange(name, category, (event.day, event.month, event.year, event.hour, event.minute, event_end.hour, event_end.minute), rule))
 			
 		
 class RepSingleDateTime(SingleDateTime):
-	def __init__(self, name, values, rule):
-		SingleDateTime.__init__(self, name, values)
+	def __init__(self, name, category, values, rule):
+		SingleDateTime.__init__(self, name, category ,values)
 		self.rule = rule
 		
 class RepSingleDateTimeRange(SingleDateTimeRange):
-	def __init__(self, name, values, rule):
-		SingleDateTimeRange.__init__(self, name, values)
+	def __init__(self, name, category, values, rule):
+		SingleDateTimeRange.__init__(self, name, category, values)
 		self.rule = rule
+		
 class RepDateTimeRange(DateTimeRange):
-	def __init__(self, name, values, rule):
-		DateTimeRange.__init__(self, name, values)
+	def __init__(self, name, category, values, rule):
+		DateTimeRange.__init__(self, name, category, values)
 		self.rule = rule
 
 class WeekdayTimeGenerator(WeekdayTimeRangeGenerator):
-	def __init__(self, name, values, rep):
+	def __init__(self, name, category, values, rep):
 		values = values + (None, None)
-		WeekdayTimeRangeGenerator.__init__(self, name, values, rep)
+		WeekdayTimeRangeGenerator.__init__(self, name, category, values, rep)
 
 
 tests = [(single_date, SingleDate),
@@ -322,24 +337,28 @@ tests = [(single_date, SingleDate),
 		(weekday_time, WeekdayTimeGenerator),
 		(weekday_time_range, WeekdayTimeRangeGenerator)]
 
-def analyze_date(name ,date, rep):
+def analyze_date(name, category, date, rep):
 	for regex, dateClass in tests:
 		rg = regex.match(date)
 		if rg:
 			if issubclass(dateClass, Generator):
-				return dateClass(name, rg.groups(), rep)
+				return dateClass(name, category, rg.groups(), rep)
 			else:
-				return dateClass(name, rg.groups())
+				return dateClass(name, category, rg.groups())
 
 def parse_wiki_page(content):
 	result = []
+	category = None
 	for line in content.splitlines(False):
 		line = line.strip()
 		dateinfo = entry.match(line)
 		if not dateinfo:
+			new_cat = category_re.match(line)
+			if new_cat:
+				category = new_cat.group(1).strip()
 			continue
 		name, date, rep = dateinfo.groups()
-		obj = analyze_date(name, date, rep)
+		obj = analyze_date(name, category, date, rep)
 		if obj:
 			if issubclass(obj.__class__, Generator):
 				result.extend(obj.entries)
