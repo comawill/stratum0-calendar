@@ -4,20 +4,20 @@ import mwclient
 import datetime
 import time
 import config
-import calendergenerator
+import calendargenerator
 import os
 
 site = mwclient.Site(('https', 'stratum0.org'), path="/mediawiki/")
 
 termine = site.Pages["Termine"]
 comment = None
-entries = calendergenerator.parse_wiki_page(termine.edit())
+entries = calendargenerator.parse_wiki_page(termine.edit())
 
 def update(entries, page, templatefile, lang):
 	global comment
 	page_data = site.Pages[page]
 	old = page_data.edit()
-	text = calendergenerator.generate_wiki_section(entries, templatefile, lang)
+	text = calendargenerator.generate_wiki_section(entries, templatefile, lang)
 	if old != text:
 		print "updating %s" % page
 		if not comment:
@@ -32,6 +32,6 @@ def update(entries, page, templatefile, lang):
 			site.login(config.user, config.password)
 		page_data.save(text, comment, minor=True)
 
-update(entries, "Template:Termine/de", os.path.join(os.path.dirname(__file__), "templates/termine_haupt.de.wiki"), calendergenerator.LANG_DE)
-update(entries, "Template:Termine/en", os.path.join(os.path.dirname(__file__), "templates/termine_haupt.en.wiki"), calendergenerator.LANG_EN)
-update(entries, "Template:Termine/fr", os.path.join(os.path.dirname(__file__), "templates/termine_haupt.fr.wiki"), calendergenerator.LANG_FR)
+update(entries, "Template:Termine/de", os.path.join(os.path.dirname(__file__), "templates/termine_haupt.de.wiki"), calendargenerator.LANG_DE)
+update(entries, "Template:Termine/en", os.path.join(os.path.dirname(__file__), "templates/termine_haupt.en.wiki"), calendargenerator.LANG_EN)
+update(entries, "Template:Termine/fr", os.path.join(os.path.dirname(__file__), "templates/termine_haupt.fr.wiki"), calendargenerator.LANG_FR)

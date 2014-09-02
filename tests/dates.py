@@ -1,5 +1,5 @@
 import unittest
-import calendergenerator as cg
+import calendargenerator as cg
 class TestDateOrder(unittest.TestCase):
 	def setUp(self):
 		self.sd1 = cg.SingleDate("name", [20,8,2014])

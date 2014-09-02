@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import icalendar as ical
 import re
-import calendergenerator
+import calendargenerator
 import mwclient
 import sys
 
@@ -14,7 +14,7 @@ if __name__ == "__main__":
 	site = mwclient.Site(('https', 'stratum0.org'), path="/mediawiki/")
 	termine = site.Pages["Termine"]
 		
-	entries = calendergenerator.parse_wiki_page(termine.edit())
+	entries = calendargenerator.parse_wiki_page(termine.edit())
 
 	for entry in entries:
 		cal.add_component(entry.getIcal())

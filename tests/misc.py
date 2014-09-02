@@ -1,7 +1,7 @@
 # -.- coding: utf8 -.-
 
 import unittest
-import calendergenerator as cg
+import calendargenerator as cg
 class TestSomeStuff(unittest.TestCase):
 	def test_DayOfWeek(self):
 		self.assertEqual(cg.day_of_week_str(1, cg.LANG_DE), "Di")

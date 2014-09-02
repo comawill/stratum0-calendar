@@ -1,5 +1,5 @@
 import unittest
-import calendergenerator as cg
+import calendargenerator as cg
 class TestUrls(unittest.TestCase):
 	def setUp(self):
 		pass
