@@ -17,13 +17,13 @@ single_date_time = re.compile("^(\d+)\.(\d+)\.(\d+)\s+(\d+)[:\.](\d+)$")
 single_date_time_range = re.compile("^(\d+)\.(\d+)\.(\d+)\s+(\d+)[:\.](\d+)\s*\-\s*(\d+)[:\.](\d+)$")
 date_range = re.compile("^(\d+)\.(\d+)\.(\d+)\s*\-\s*(\d+)\.(\d+)\.(\d+)$")
 date_range_time = re.compile("^(\d+)\.(\d+)\.(\d+)\s+(\d+)[:\.](\d+)\s*\-\s*(\d+)\.(\d+)\.(\d+)\s+(\d+)[:\.](\d+)$")
-weekday_time = re.compile("^([a-zA-Z0-9]+),?\s*(\d+)[:\.](\d+)$")
-weekday_time_range = re.compile("^([a-zA-Z0-9]+),?\s*(\d+)[:\.](\d+)\s*\-\s*(\d+)[:\.](\d+)$")
+weekday_time = re.compile("^([a-zA-Z0-9/]+),?\s*(\d+)[:\.](\d+)$")
+weekday_time_range = re.compile("^([a-zA-Z0-9/]+),?\s*(\d+)[:\.](\d+)\s*\-\s*(\d+)[:\.](\d+)$")
 
 mediawiki_intern_link = re.compile(r"(\[\[([^|]+)\|?(.*)\]\])")
 mediawiki_extern_link = re.compile(r"(\[([^\ ]+)\s+(.*)\])")
 
-dow_regex = re.compile(r"^((\d+)x|)(\w+)")
+dow_regex = re.compile(r"^(\w+)(|/(\d+))$")
 dow_index = {"mo":0,
 	"mon":0,
 	"di":1,
@@ -226,7 +226,7 @@ class WeekdayTimeRangeGenerator(Generator):
 		dow = dow_regex.match(kind)
 		if not dow:
 			return
-		_, interval, wd = dow.groups()
+		wd, _, interval = dow.groups()
 		if interval:
 			interval = int(interval)
 		else:
