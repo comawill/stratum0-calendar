@@ -5,6 +5,7 @@ import datetime
 import time
 import config
 import calendergenerator
+import os
 
 site = mwclient.Site(('https', 'stratum0.org'), path="/mediawiki/")
 
@@ -31,6 +32,6 @@ def update(entries, page, templatefile, lang):
 			site.login(config.user, config.password)
 		page_data.save(text, comment, minor=True)
 
-update(entries, "Template:Termine/de", "templates/termine_haupt.de.wiki", calendergenerator.LANG_DE)
-update(entries, "Template:Termine/en", "templates/termine_haupt.en.wiki", calendergenerator.LANG_EN)
-update(entries, "Template:Termine/fr", "templates/termine_haupt.fr.wiki", calendergenerator.LANG_FR)
+update(entries, "Template:Termine/de", os.path.join(os.path.dirname(__file__), "templates/termine_haupt.de.wiki"), calendergenerator.LANG_DE)
+update(entries, "Template:Termine/en", os.path.join(os.path.dirname(__file__), "templates/termine_haupt.en.wiki"), calendergenerator.LANG_EN)
+update(entries, "Template:Termine/fr", os.path.join(os.path.dirname(__file__), "templates/termine_haupt.fr.wiki"), calendergenerator.LANG_FR)
