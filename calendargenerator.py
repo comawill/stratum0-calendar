@@ -95,6 +95,7 @@ class DatePrinter(object):
 
 	def getIcal(self):
 		event = ical.Event()
+		event.add('uid', md5.new(self.name.encode("utf8") + str(self.start_date)).hexdigest() + "@stratum0.org")
 		event.add('summary', self.getPlainName().encode("utf8"))
 		url = self.getURL()
 		if url:
