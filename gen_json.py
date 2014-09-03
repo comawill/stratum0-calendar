@@ -11,7 +11,7 @@ if __name__ == "__main__":
 	site = mwclient.Site(('https', 'stratum0.org'), path="/mediawiki/")
 	termine = site.Pages["Termine"]
 	
-	entries = calendargenerator.parse_wiki_page(termine.edit())
+	entries = calendargenerator.expand_dates(calendargenerator.parse_wiki_page(termine.edit()))
 	e = []
 	css = []
 	for entry in entries:

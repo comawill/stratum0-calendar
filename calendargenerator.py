@@ -256,7 +256,23 @@ class DateTimeRange(DatePrinter):
 
 class Generator:
 	def __init__(self):
-		pass
+		self.enties = []
+	
+	def getIcal(self):
+		if not self.entries:
+			return None
+		first = self.entries[0]
+		event = first.getIcal()
+		#print first.rule
+		#print first.name
+		#print dir(first.rule)
+		#print first.rule._freq
+		interval = first.rule._interval
+		until = first.rule._until
+		#print (first.rule.__dict__)
+		#exit()
+		event.add('rrule', {'FREQ': ['WEEKLY'], 'INTERVAL': [interval], 'UNTIL': [until]})		
+		return event
 
 class WeekdayTimeRangeGenerator(Generator):
 	def __init__(self, name, category, values, rep):
@@ -363,10 +379,16 @@ def parse_wiki_page(content):
 		name, date, rep = dateinfo.groups()
 		obj = analyze_date(name, category, date, rep)
 		if obj:
-			if issubclass(obj.__class__, Generator):
-				result.extend(obj.entries)
-			else:
-				result.append(obj)
+			result.append(obj)
+	return result
+
+def expand_dates(dates):
+	result =[]
+	for date in dates:
+		if issubclass(date.__class__, Generator):
+			result.extend(date.entries)
+		else:
+			result.append(date)
 	return result
 
 def next_up(entries):

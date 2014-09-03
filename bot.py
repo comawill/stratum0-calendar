@@ -12,7 +12,7 @@ site = mwclient.Site(('https', 'stratum0.org'), path="/mediawiki/")
 
 termine = site.Pages["Termine"]
 comment = None
-entries = calendargenerator.parse_wiki_page(termine.edit())
+entries = calendargenerator.expand_dates(calendargenerator.parse_wiki_page(termine.edit()))
 
 def update(entries, page, purge_page, templatefile, lang):
 	global comment
