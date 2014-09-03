@@ -1,4 +1,5 @@
 git+git://github.com/mwclient/mwclient.git
 python-dateutil
 icalendar
+requests
 pytz
