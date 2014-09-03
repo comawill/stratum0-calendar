@@ -48,8 +48,10 @@ dow_index = {"mo":0,
 
 DEFAULT_DURATION = 3 #3h
 MAX_NEXT_UP_REPEATED = 3
+MAX_NEXT_UP_REPEATED_DAYS = 4 * 7
+MAX_NEXT_UP_DAYS = 31 * 3
 MAX_IN_BEFORE_REPEATED = 1
-
+MAX_IN_BEFORE_DAYS = 31
 
 
 LANG_DE = "de_DE.UTF-8"
@@ -370,16 +372,24 @@ def parse_wiki_page(content):
 def next_up(entries):
 	repeated_events = {}
 	now_ = datetime.datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(tz)
-	now = now_-datetime.timedelta(hours=1)
+	now = now_ - datetime.timedelta(hours=1)
+	far_far_away = now + datetime.timedelta(days=MAX_NEXT_UP_REPEATED_DAYS)
+	far_far_far_away = now + datetime.timedelta(days=MAX_NEXT_UP_DAYS)
 	result = []
 	for entry in sorted(entries):
 		if entry.end_date > now:
-			# detect repeating events by nameyy
+			# detect repeating events by name
 			eventid = entry.getPlainName()
 			if eventid not in repeated_events:
 				repeated_events[eventid] = 0
 			repeated_events[eventid] +=1
 			if repeated_events[eventid] > MAX_NEXT_UP_REPEATED:
+				continue
+			# repeated events only in the near future
+			if repeated_events[eventid] > 1 and entry.start_date > far_far_away:
+				continue
+			# restrict all events to not so fare future
+			if entry.start_date > far_far_far_away:
 				continue
 				
 			result.append(entry)
@@ -389,8 +399,8 @@ def next_up(entries):
 def in_before(entries):
 	repeated_events = {}
 	now_ = datetime.datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(tz)
-	now = now_-datetime.timedelta(hours=1)
-	lowest = now_-datetime.timedelta(days=31)
+	now = now_ - datetime.timedelta(hours=1)
+	lowest = now_ - datetime.timedelta(days=MAX_IN_BEFORE_DAYS)
 	result = []
 	for entry in sorted(entries, reverse=True):
 		if entry.end_date < now  and entry.end_date > lowest:
