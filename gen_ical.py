@@ -7,6 +7,9 @@ import sys
 
 if __name__ == "__main__":
 	cal = ical.Calendar()
+	timezone = ical.cal.Timezone()
+	timezone.add('TZID', 'Europe/Berlin')
+	cal.add_component(timezone)
 	cal.add('version', '2.0')
 	cal.add('prodid', '-//willenbot')
 	cal.add('x-wr-calname', 'Stratum 0')
