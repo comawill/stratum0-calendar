@@ -34,9 +34,9 @@ if __name__ == "__main__":
 		print json.dumps(result).encode("utf8")
 	css_content = ""
 	for group in css:
-		color = md5.new(group).hexdigest()[:3]
-		css_content += ".%s { background-color: #%s; }\n" % (group, color)
-		css_content += ".dh-%s {background-color: #%s; }\n" % (group, color)
+		color = "".join(map(lambda a: chr(int(a * 2, 16) | 0x1F).encode("hex"), list(md5.new(group).hexdigest()[:3])))
+		
+		css_content += ".%s, .dh-%s { background-color: #%s; }\n" % (group, group, color)
 
 	if len(sys.argv) > 2:
 		f = file(sys.argv[2], "w")
