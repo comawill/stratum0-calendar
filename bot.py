@@ -46,4 +46,4 @@ update(expanded_entries, "Template:Termine/en", "English", os.path.join(os.path.
 update(expanded_entries, "Template:Termine/fr", u"Français", os.path.join(os.path.dirname(__file__), "templates/termine_haupt.fr.wiki"), calendargenerator.LANG_FR)
 
 calendargenerator.generate_ical(entries, config.ical)
-calendargenerator.generate_json_css(expanded_entries, config.json, config.ical)
+calendargenerator.generate_json_css(expanded_entries, config.json, config.css)
