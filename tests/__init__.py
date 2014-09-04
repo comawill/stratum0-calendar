@@ -1,3 +1,3 @@
 from dates import *
-from links import *
+from parser import *
 from misc import *
