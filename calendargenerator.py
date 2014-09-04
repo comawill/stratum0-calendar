@@ -116,7 +116,7 @@ class DatePrinter(object):
 		result["url"] = self.getURL()
 		result["class"] = "event-%s" % simple_name(self.category)
 		result["start"] = int(time.mktime(self.start_date.timetuple()) * 1000)
-		result["end"] = int(time.mktime(self.end_date.timetuple()) * 1000)
+		result["end"] = int(time.mktime(self.end_date.timetuple()) * 1000)-1
 		
 		return result
 		
