@@ -9,6 +9,22 @@ import pytz
 import calendar
 import md5
 import string
+import os
+import json
+
+TIMEZONE = 'Europe/Berlin'
+DEFAULT_DURATION = 3 #3h
+MAX_NEXT_UP_REPEATED = 3
+MAX_NEXT_UP_REPEATED_DAYS = 4 * 7
+MAX_NEXT_UP_DAYS = 31 * 3
+MAX_IN_BEFORE_REPEATED = 1
+MAX_IN_BEFORE_DAYS = 31
+
+
+LANG_DE = "de_DE.UTF-8"
+LANG_EN = "en_US.UTF-8"
+LANG_FR = "fr_CA.UTF-8"
+
 
 tz = pytz.timezone('Europe/Berlin')
 
@@ -47,17 +63,6 @@ dow_index = {"mo":0,
 	"sun":6}
 
 
-DEFAULT_DURATION = 3 #3h
-MAX_NEXT_UP_REPEATED = 3
-MAX_NEXT_UP_REPEATED_DAYS = 4 * 7
-MAX_NEXT_UP_DAYS = 31 * 3
-MAX_IN_BEFORE_REPEATED = 1
-MAX_IN_BEFORE_DAYS = 31
-
-
-LANG_DE = "de_DE.UTF-8"
-LANG_EN = "en_US.UTF-8"
-LANG_FR = "fr_CA.UTF-8"
 
 def simple_name(name):
 	name = name.lower()
@@ -187,8 +192,6 @@ class DatePrinter(object):
 		if isinstance(other, datetime.datetime):
 			return self.start_date() <= other
 		return self < other or self == other
-
-	
 
 	def __eq__(self, other):
 		return self.start_datetime() == other.start_datetime() and self.end_datetime() == other.end_datetime()
@@ -487,3 +490,68 @@ def generate_wiki_section(entries, templatefile, lang=LANG_DE):
 	prev_dates = "\n".join(prev_dates)
 	result = result.format(next_dates=next_dates, prev_dates=prev_dates)
 	return result
+
+def write_if_changed(filename, content):
+	if not os.path.exists(filename) or content != file(filename).read():
+		f = file(filename, "w")
+		f.write(content)
+		f.close()
+
+def generate_ical(entries, filename):
+	cal = ical.Calendar()
+	timezone = ical.cal.Timezone()
+	timezone.add('TZID', TIMEZONE)
+	timezone.add('x-lic-location', TIMEZONE)
+
+	tzs = ical.TimezoneStandard()
+	tzs.add('tzname', 'MEZ')
+	tzs.add('dtstart', datetime.datetime(1996, 10, 27, 3, 0, 0))
+	tzs.add('rrule', {'freq': 'yearly', 'bymonth': 10, 'byday': '-1su'})
+	tzs.add('TZOFFSETFROM', datetime.timedelta(hours=2))
+	tzs.add('TZOFFSETTO', datetime.timedelta(hours=1))
+	
+	tzd = ical.TimezoneDaylight()
+	tzd.add('tzname', 'MESZ')
+	tzd.add('dtstart', datetime.datetime(1981, 3, 29, 2, 0, 0))
+	tzs.add('rrule', {'freq': 'yearly', 'bymonth': 3, 'byday': '-1su'})
+	tzd.add('TZOFFSETFROM', datetime.timedelta(hours=1))
+	tzd.add('TZOFFSETTO', datetime.timedelta(hours=2))
+
+	timezone.add_component(tzs)
+	timezone.add_component(tzd)
+	cal.add_component(timezone)
+
+
+
+	cal.add('version', '2.0')
+	cal.add('prodid', '-//willenbot')
+	cal.add('x-wr-calname', 'Stratum 0')
+		
+	for entry in entries:
+		cal.add_component(entry.getIcal())
+	write_if_changed(filename, cal.to_ical())
+
+
+def generate_json_css(entries, jsonfile, cssfile):
+	e = []
+	css = []
+	for entry in entries:
+		data = entry.getJson()
+		group = data["class"]
+		if group not in css:
+			css.append(group)
+		e.append(data)
+	
+	result = {
+			"success": 1,
+			"result": e
+	}
+	
+	write_if_changed(jsonfile, json.dumps(result).encode("utf8"))
+
+	css_content = ""
+	for group in css:
+		color = "".join(map(lambda a: chr(int(a * 2, 16) | 0x1F).encode("hex"), list(md5.new(group).hexdigest()[:3])))
+		
+	css_content += ".{name},.dh-{name} {{background-color:#{color};}}\n".format(name=group, color=color)
+	write_if_changed(cssfile, css_content)
