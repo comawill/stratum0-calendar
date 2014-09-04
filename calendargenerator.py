@@ -87,6 +87,9 @@ def to_in_lang(lang):
 def make_extern(intern_url):
 	return "https://stratum0.org/wiki/%s" % intern_url.replace(" ", "_")
 
+def date2datetime(date):
+	return tz.localize(datetime.datetime(date.year, date.month, date.day, 0 ,0))
+
 class DatePrinter(object):
 	def __init__(self, name, category, start_date, end_date):
 		self.name = name
@@ -158,18 +161,55 @@ class DatePrinter(object):
 			return extern_url[1]
 
 		return None
+	
+	def start_datetime(self):
+		if type(self.start_date) is datetime.date:
+			return date2datetime(self.start_date)
+		return self.start_date
+	
+	def end_datetime(self):
+		if type(self.end_date) is datetime.date:
+			return date2datetime(self.end_date)
+		return self.end_date
 
 	def __lt__(self, other):
-		return other > self.start_date
+		if isinstance(other, datetime.datetime):
+			return self.start_datetime() < other
+		if self.start_datetime() >= other.start_datetime() and self.end_datetime() < other.end_datetime():
+			return True
+		if self.start_datetime() == other.start_datetime():
+			return self.end_datetime() < other.end_datetime()
+		return self.start_datetime() < other.start_datetime()
+	
+	def __le__(self, other):
+		if isinstance(other, datetime.datetime):
+			return self.start_date() <= other
+		return self < other or self == other
+
+	
+
+	def __eq__(self, other):
+		return self.start_datetime() == other.start_datetime() and self.end_datetime() == other.end_datetime()
 
 	def __gt__(self, other):
-		return other < self.end_date
+		if isinstance(other, datetime.datetime):
+			return self.end_datetime() > other
+		if self.start_datetime() <= other.start_datetime() and self.end_datetime() > other.end_datetime():
+			return True
+		if self.start_datetime() == other.start_datetime():
+			return self.end_datetime() > other.end_datetime()
+		return self.start_datetime() > other.start_datetime()
+		
+	def __ge__(self, other):
+		if isinstance(other, datetime.datetime):
+			return self.end_date() >= other
+		return self > other or self == other
 
 
 class SingleDate(DatePrinter):
 	def __init__(self, name, category, values):
 		day, month, year = map(int, values)
-		date = tz.localize(datetime.datetime(year, month, day, 0 , 0))
+		date = datetime.date(year, month, day)
 		date_end = date + datetime.timedelta(days=1)
 		DatePrinter.__init__(self, name, category, date, date_end)
 	
@@ -217,21 +257,22 @@ class SingleDateTimeRange(DatePrinter):
 class DateRange(DatePrinter):
 	def __init__(self, name, category, values):
 		day, month, year, day2, month2, year2 = map(int, values)
-		date = tz.localize(datetime.datetime(year, month, day, 0, 0))
-		date_end = tz.localize(datetime.datetime(year2, month2, day2, 0, 0))
+		date = datetime.date(year, month, day)
+		date_end = datetime.date(year2, month2, day2)+datetime.timedelta(days=1)
+		self.end_date2 = datetime.date(year2, month2, day2)
 		DatePrinter.__init__(self, name, category, date, date_end)
 	
 	def getDetailPlain(self, lang=LANG_DE):
 		dow = day_of_week_str(self.start_date.weekday(), lang)
-		dow2 = day_of_week_str(self.end_date.weekday(), lang)
+		dow2 = day_of_week_str(self.end_date2.weekday(), lang)
 		to = to_in_lang(lang)
-		return "%s, %02d.%02d. %s %s, %02d.%02d.: %s" % (dow, self.start_date.day, self.start_date.month, to, dow2, self.end_date.day, self.end_date.month, self.getPlainName())
+		return "%s, %02d.%02d. %s %s, %02d.%02d.: %s" % (dow, self.start_date.day, self.start_date.month, to, dow2, self.end_date2.day, self.end_date2.month, self.getPlainName())
 	
 	def getMediawikiEntry(self, lang=LANG_DE):
 		dow = day_of_week_str(self.start_date.weekday(), lang)
-		dow2 = day_of_week_str(self.end_date.weekday(), lang)
+		dow2 = day_of_week_str(self.end_date2.weekday(), lang)
 		to = to_in_lang(lang)
-		return "* %s, %02d.%02d. %s %s, %02d.%02d.: %s" % (dow, self.start_date.day, self.start_date.month, to, dow2, self.end_date.day, self.end_date.month, self.getMediawikiName())
+		return "* %s, %02d.%02d. %s %s, %02d.%02d.: %s" % (dow, self.start_date.day, self.start_date.month, to, dow2, self.end_date2.day, self.end_date2.month, self.getMediawikiName())
 
 
 class DateTimeRange(DatePrinter):
@@ -263,14 +304,8 @@ class Generator:
 			return None
 		first = self.entries[0]
 		event = first.getIcal()
-		#print first.rule
-		#print first.name
-		#print dir(first.rule)
-		#print first.rule._freq
 		interval = first.rule._interval
 		until = first.rule._until
-		#print (first.rule.__dict__)
-		#exit()
 		event.add('rrule', {'FREQ': ['WEEKLY'], 'INTERVAL': [interval], 'UNTIL': [until]})		
 		return event
 
@@ -399,7 +434,7 @@ def next_up(entries):
 	far_far_far_away = now + datetime.timedelta(days=MAX_NEXT_UP_DAYS)
 	result = []
 	for entry in sorted(entries):
-		if entry.end_date > now:
+		if entry.end_datetime() > now:
 			# detect repeating events by name
 			eventid = entry.getPlainName()
 			if eventid not in repeated_events:
@@ -408,10 +443,10 @@ def next_up(entries):
 			if repeated_events[eventid] > MAX_NEXT_UP_REPEATED:
 				continue
 			# repeated events only in the near future
-			if repeated_events[eventid] > 1 and entry.start_date > far_far_away:
+			if repeated_events[eventid] > 1 and entry.start_datetime() > far_far_away:
 				continue
 			# restrict all events to not so fare future
-			if entry.start_date > far_far_far_away:
+			if entry.start_datetime() > far_far_far_away:
 				continue
 				
 			result.append(entry)
@@ -425,7 +460,7 @@ def in_before(entries):
 	lowest = now_ - datetime.timedelta(days=MAX_IN_BEFORE_DAYS)
 	result = []
 	for entry in sorted(entries, reverse=True):
-		if entry.end_date < now  and entry.end_date > lowest:
+		if entry.end_datetime() < now  and entry.end_datetime() > lowest:
 			# detect repeating events by nameyy
 			eventid = entry.getPlainName()
 			if eventid not in repeated_events:
