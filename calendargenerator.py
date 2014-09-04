@@ -552,6 +552,5 @@ def generate_json_css(entries, jsonfile, cssfile):
 	css_content = ""
 	for group in css:
 		color = "".join(map(lambda a: chr(int(a * 2, 16) | 0x1F).encode("hex"), list(md5.new(group).hexdigest()[:3])))
-		
-	css_content += ".{name},.dh-{name} {{background-color:#{color};}}\n".format(name=group, color=color)
+		css_content += ".{name},.dh-{name} {{background-color:#{color};}}\n".format(name=group, color=color)
 	write_if_changed(cssfile, css_content)
