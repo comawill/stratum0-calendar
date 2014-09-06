@@ -1,0 +1,57 @@
+ignore this text
+
+== CTF-Stuff ==
+{| class="prettytable"
+! Event !! Termin !! Im Zeitraum
+|-
+|[[CTF]] Training || Mi, 19.00 || 20.5.2014 - 1.8.2014
+|-
+|[http://nuitduhack.com/en/challenges-nuit-du-hack Nuit du hack 2014 Finals] in Paris, Platz 2 ||  28.06.2014 21:00 -29.06.2014 07:00 ||
+|}
+
+== Kochen im Space ==
+{| class="prettytable"
+! Event !! Termin !! Im Zeitraum
+|-
+|[[Vegan Academy]] || Di/2 19.00 || 10.06.2014-31.12.2014
+|}
+
+== CoderDojo ==
+{| class="prettytable"
+! Event !! Termin !! Im Zeitraum
+|-
+|  CoderDojo-Orgatraffen || 06.07.2014 18:00 ||
+|-
+|1. [[CoderDojo]] BS ||19.07.2014 14:00-17.00 ||
+|-
+|2. [[CoderDojo]] BS ||30.08.2014 14:00-17.00 ||
+|}
+
+== Vorträge ==
+{| class="prettytable"
+! Event !! Termin !! Im Zeitraum
+|-
+|[[Vorträge]] || 14.08.2014 19:00 ||
+|-
+|[[Vorträge]] || 14.09.2014 19:00 ||
+|}
+
+== OSM ==
+{| class="prettytable"
+! Event !! Termin !! Im Zeitraum
+|-
+| OSM-Stammtisch ([http://wiki.openstreetmap.org/wiki/Braunschweig/Stammtisch im OSM-Wiki])|| 14.08.2014 19:00 ||
+|-
+| OSM-Stammtisch ([http://wiki.openstreetmap.org/wiki/Braunschweig/Stammtisch im OSM-Wiki])|| 13.07.2014 19:00 ||
+|}
+
+== Externes ==
+{| class="prettytable"
+! Event !! Termin !! Im Zeitraum
+|-
+|''[https://entropia.de/GPN14 Gulaschprogrammiernacht 14] ([[Zeitabgleich#GPN14.2C_Karlsruhe|Zeitabgleich]])'' || 19.06.2014 -22.06.2014 ||
+|-
+|''[https://wiki.attraktor.org/Large_Hackerspace_Convention_5 LHC 5 im Attraktor]''|| 18.07.2014 - 20.07.2014 ||
+|-
+| ''MakerFaire'' || 05.07.2014 -06.07.2014 ||
+|}

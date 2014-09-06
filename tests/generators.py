@@ -33,4 +33,4 @@ class TestGenerators(unittest.TestCase):
 
 	def test_GenerateWiki(self):
 		now = cg.tz.localize(datetime.datetime(2014,10,10,10,10))
-		cg.generate_wiki_section(cg.expand_dates(self.events), "../templates/termine_haupt.de.wiki", cg.LANG_DE, now=now)
+		cg.generate_wiki_section(cg.expand_dates(self.events), "templates/termine_haupt.de.wiki", cg.LANG_DE, now=now)

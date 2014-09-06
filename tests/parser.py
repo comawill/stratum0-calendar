@@ -1,5 +1,6 @@
 import unittest
 import calendargenerator as cg
+
 class TestUrls(unittest.TestCase):
 	def setUp(self):
 		pass
@@ -42,3 +43,9 @@ class TestPlainName(unittest.TestCase):
 		self.assertEqual(url_date.getPlainName(), "abc def ghi")
 	
 
+class TestWikiParser(unittest.TestCase):
+	def setUp(self):
+		pass
+
+	def test_parseWiki(self):
+		cg.parse_wiki_page(file("tests/wiki/general.wiki").read())
