@@ -3,3 +3,4 @@ events.json
 events.ics
 category.css
 bower_components/
+.coverage

@@ -1,2 +1,2 @@
 #!/bin/bash
-nosetests -vs -w tests
+nosetests -vs --with-coverage --cover-package=calendargenerator
