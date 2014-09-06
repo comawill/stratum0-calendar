@@ -190,7 +190,7 @@ class DatePrinter(object):
 	
 	def __le__(self, other):
 		if isinstance(other, datetime.datetime):
-			return self.start_date() <= other
+			return self.start_datetime() <= other
 		return self < other or self == other
 
 	def __eq__(self, other):
@@ -207,7 +207,7 @@ class DatePrinter(object):
 		
 	def __ge__(self, other):
 		if isinstance(other, datetime.datetime):
-			return self.end_date() >= other
+			return self.end_datetime() >= other
 		return self > other or self == other
 
 
@@ -302,7 +302,7 @@ class DateTimeRange(DatePrinter):
 
 class Generator:
 	def __init__(self):
-		self.enties = []
+		self.entries = []
 	
 	def getIcal(self):
 		if not self.entries:
@@ -361,7 +361,7 @@ class WeekdayTimeRangeGenerator(Generator):
 				self.entries.append(RepSingleDateTime(name, category, (event.day, event.month, event.year, event.hour, event.minute), rule))
 			else:
 				if event_end.day != event.day:
-					self.entries.append(RepDateRangeTime(name, category, (event.day, event.month, event.year, event.hour, event.minute, event_end.day, event_end.month, event_end.year, event_end.hour, event_end.minute), rule))
+					self.entries.append(RepDateTimeRange(name, category, (event.day, event.month, event.year, event.hour, event.minute, event_end.day, event_end.month, event_end.year, event_end.hour, event_end.minute), rule))
 
 				else:
 					self.entries.append(RepSingleDateTimeRange(name, category, (event.day, event.month, event.year, event.hour, event.minute, event_end.hour, event_end.minute), rule))
@@ -431,9 +431,9 @@ def expand_dates(dates):
 			result.append(date)
 	return result
 
-def next_up(entries):
+def next_up(entries, now_):
 	repeated_events = {}
-	now_ = datetime.datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(tz)
+	
 	now = now_ - datetime.timedelta(hours=1)
 	far_far_away = now + datetime.timedelta(days=MAX_NEXT_UP_REPEATED_DAYS)
 	far_far_far_away = now + datetime.timedelta(days=MAX_NEXT_UP_DAYS)
@@ -458,9 +458,8 @@ def next_up(entries):
 			
 	return result
 
-def in_before(entries):
+def in_before(entries, now_):
 	repeated_events = {}
-	now_ = datetime.datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(tz)
 	now = now_ - datetime.timedelta(hours=1)
 	lowest = now_ - datetime.timedelta(days=MAX_IN_BEFORE_DAYS)
 	result = []
@@ -478,14 +477,16 @@ def in_before(entries):
 			
 	return result
 
-def generate_wiki_section(entries, templatefile, lang=LANG_DE):
+def generate_wiki_section(entries, templatefile, lang=LANG_DE, now=None):
+	if now == None:
+		now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(tz)
 	result = file(templatefile).read().decode("utf8")
 	next_dates = []
-	for i in next_up(entries):
+	for i in next_up(entries, now):
 		next_dates.append(i.getMediawikiEntry(lang=lang))
 	next_dates = "\n".join(next_dates)
 	prev_dates = []
-	for i in in_before(entries):
+	for i in in_before(entries, now):
 		prev_dates.append(i.getMediawikiEntry(lang=lang))
 	prev_dates = "\n".join(prev_dates)
 	result = result.format(next_dates=next_dates, prev_dates=prev_dates)
@@ -528,7 +529,9 @@ def generate_ical(entries, filename):
 	cal.add('x-wr-calname', 'Stratum 0')
 		
 	for entry in entries:
-		cal.add_component(entry.getIcal())
+		component = entry.getIcal()
+		if component:
+			cal.add_component(component)
 	write_if_changed(filename, cal.to_ical())
 
 

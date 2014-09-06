@@ -1,7 +1,12 @@
 import unittest
 import calendargenerator as cg
+import datetime
+
 class TestDateOrder(unittest.TestCase):
 	def setUp(self):
+		self.datetime1 = cg.tz.localize(datetime.datetime(2010, 4, 1, 12, 22))
+		self.datetime2 = cg.tz.localize(datetime.datetime(2020, 4, 1, 12, 22))
+
 		self.sd1 = cg.SingleDate("name", "cat", [20,8,2014])
 		self.sd2 = cg.SingleDate("name", "cat", [21,8,2014])
 		self.sd3 = cg.SingleDate("name", "cat", [21,8,2014])
@@ -23,7 +28,13 @@ class TestDateOrder(unittest.TestCase):
 		
 		self.dtr1 = cg.DateTimeRange("name", "cat", [20,8,2014,12,00, 21,8,2014,14,00])
 		self.dtr2 = cg.DateTimeRange("name", "cat", [20,9,2014,13,00, 21,8,2014,15,00])
-	
+
+	def test_compareDatetime(self):
+		self.assertTrue(self.sd1 > self.datetime1)
+		self.assertTrue(self.sd1 >= self.datetime1)
+		self.assertTrue(self.sd1 < self.datetime2)
+		self.assertTrue(self.sd1 <= self.datetime2)
+
 	def test_compareSingleDateSingleDateTime(self):
 		self.assertTrue(self.sd1 > self.sdt3)
 		self.assertTrue(self.sdt3 < self.sd1)
@@ -92,4 +103,15 @@ class TestDateOrder(unittest.TestCase):
 		
 		self.assertTrue(self.dtr1 < self.dtr2)
 		self.assertTrue(self.dtr2 > self.dtr1)
+
+	def test_WeekdayMidnight(self):
+		generator = cg.WeekdayTimeRangeGenerator("name", "cat", ("do", 23, 0, 3, 14), ("1.1.2014 - 31.12.2014"))
+		self.assertTrue((generator.entries[0].end_datetime() - generator.entries[0].start_datetime()).total_seconds() > 0)
+	
+
+	def test_BrokenWeekdayRange(self):
+		generator = cg.WeekdayTimeRangeGenerator("name", "cat", ("do", 23, 0, 3, 14), ("1.1.2014  31.12.2014"))
+	
+	def test_BrokenWeekdayRange2(self):
+		generator = cg.WeekdayTimeRangeGenerator("name", "cat", ("Do+2", 23, 0, 3, 14), ("1.1.2014 - 31.12.2014"))
 
