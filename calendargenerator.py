@@ -13,7 +13,7 @@ import os
 import json
 
 TIMEZONE = 'Europe/Berlin'
-DEFAULT_DURATION = 3 #3h
+DEFAULT_DURATION = 3  # 3h
 MAX_NEXT_UP_REPEATED = 3
 MAX_NEXT_UP_REPEATED_DAYS = 4 * 7
 MAX_NEXT_UP_DAYS = 31 * 3
@@ -47,21 +47,21 @@ category_re = re.compile(r"==([^=]+)==")
 
 
 dow_regex = re.compile(r"^(\w+)(|/(\d+))$")
-dow_index = {"mo":0,
-	"mon":0,
-	"di":1,
-	"tue":1,
-	"mi":2,
-	"wed":2,
-	"do":3,
-	"thu":3,
-	"fr":4,
-	"fri":4,
-	"sa":5,
-	"sat":5,
-	"so":6,
-	"sun":6}
-
+dow_index = {
+	"mo": 0,
+	"mon": 0,
+	"di": 1,
+	"tue": 1,
+	"mi": 2,
+	"wed": 2,
+	"do": 3,
+	"thu": 3,
+	"fr": 4,
+	"fri": 4,
+	"sa": 5,
+	"sat": 5,
+	"so": 6,
+	"sun": 6}
 
 
 def simple_name(name):
@@ -73,12 +73,15 @@ def simple_name(name):
 			new_name.append(char)
 	return "".join(new_name)
 
+
 def day_of_week_str(day_of_week, lang):
 	with calendar.TimeEncoding(lang):
 		return calendar.day_abbr[day_of_week].title()
 
+
 def short_lang(lang):
 	return lang.split("_")[0]
+
 
 def to_in_lang(lang):
 	slang = short_lang(lang)
@@ -90,11 +93,14 @@ def to_in_lang(lang):
 		return u"à"
 	return "--"
 
+
 def make_extern(intern_url):
 	return "https://stratum0.org/wiki/%s" % intern_url.replace(" ", "_")
 
+
 def date2datetime(date):
-	return tz.localize(datetime.datetime(date.year, date.month, date.day, 0 ,0))
+	return tz.localize(datetime.datetime(date.year, date.month, date.day, 0, 0))
+
 
 class DatePrinter(object):
 	def __init__(self, name, category, start_date, end_date):
@@ -114,7 +120,7 @@ class DatePrinter(object):
 		event.add('dtstart', self.start_date)
 		event.add('dtend', self.end_date)
 		return event
-	
+
 	def getJson(self):
 		result = {}
 		result["id"] = md5.new(self.getPlainName().encode("utf8")).hexdigest()
@@ -122,16 +128,16 @@ class DatePrinter(object):
 		result["url"] = self.getURL()
 		result["class"] = "event-%s" % simple_name(self.category)
 		result["start"] = int(time.mktime(self.start_date.timetuple()) * 1000)
-		result["end"] = int(time.mktime(self.end_date.timetuple()) * 1000)-1
-		
+		result["end"] = int(time.mktime(self.end_date.timetuple()) * 1000) - 1
+
 		return result
-		
+
 	def getMediawikiEntry(self, lang=LANG_DE):
 		raise Exception("not implemented")
 
 	def getDetailPlain(self, lang=LANG_DE):
 		raise Exception("not implemented")
-	
+
 	def getMediawikiName(self):
 		return self.name
 
@@ -166,14 +172,13 @@ class DatePrinter(object):
 			return make_extern(intern_url[2])
 		if extern_url:
 			return extern_url[1]
-
 		return None
-	
+
 	def start_datetime(self):
 		if type(self.start_date) is datetime.date:
 			return date2datetime(self.start_date)
 		return self.start_date
-	
+
 	def end_datetime(self):
 		if type(self.end_date) is datetime.date:
 			return date2datetime(self.end_date)
@@ -187,7 +192,7 @@ class DatePrinter(object):
 		if self.start_datetime() == other.start_datetime():
 			return self.end_datetime() < other.end_datetime()
 		return self.start_datetime() < other.start_datetime()
-	
+
 	def __le__(self, other):
 		if isinstance(other, datetime.datetime):
 			return self.start_datetime() <= other
@@ -204,7 +209,7 @@ class DatePrinter(object):
 		if self.start_datetime() == other.start_datetime():
 			return self.end_datetime() > other.end_datetime()
 		return self.start_datetime() > other.start_datetime()
-		
+
 	def __ge__(self, other):
 		if isinstance(other, datetime.datetime):
 			return self.end_datetime() >= other
@@ -217,7 +222,7 @@ class SingleDate(DatePrinter):
 		date = datetime.date(year, month, day)
 		date_end = date + datetime.timedelta(days=1)
 		DatePrinter.__init__(self, name, category, date, date_end)
-	
+
 	def getDetailPlain(self, lang=LANG_DE):
 		dow = day_of_week_str(self.start_date.weekday(), lang)
 		return "%s, %02d.%02d.: %s" % (dow, self.start_date.day, self.start_date.month, self.getPlainName())
@@ -233,7 +238,7 @@ class SingleDateTime(DatePrinter):
 		date = tz.localize(datetime.datetime(year, month, day, hour, minute))
 		date_end = date + datetime.timedelta(hours=DEFAULT_DURATION)
 		DatePrinter.__init__(self, name, category, date, date_end)
-	
+
 	def getDetailPlain(self, lang=LANG_DE):
 		dow = day_of_week_str(self.start_date.weekday(), lang)
 		return "%s, %02d.%02d. %02d:%02d: %s" % (dow, self.start_date.day, self.start_date.month, self.start_date.hour, self.start_date.minute, self.getPlainName())
@@ -249,11 +254,11 @@ class SingleDateTimeRange(DatePrinter):
 		date = tz.localize(datetime.datetime(year, month, day, hour, minute))
 		date_end = tz.localize(datetime.datetime(year, month, day, hour2, minute2))
 		DatePrinter.__init__(self, name, category, date, date_end)
-	
+
 	def getDetailPlain(self, lang=LANG_DE):
 		dow = day_of_week_str(self.start_date.weekday(), lang)
 		return "%s, %02d.%02d. %02d:%02d - %02d:%02d: %s" % (dow, self.start_date.day, self.start_date.month, self.start_date.hour, self.start_date.minute, self.end_date.hour, self.end_date.minute, self.getPlainName())
-	
+
 	def getMediawikiEntry(self, lang=LANG_DE):
 		dow = day_of_week_str(self.start_date.weekday(), lang)
 		return "* %s, %02d.%02d. %02d:%02d - %02d:%02d: %s" % (dow, self.start_date.day, self.start_date.month, self.start_date.hour, self.start_date.minute, self.end_date.hour, self.end_date.minute, self.getMediawikiName())
@@ -263,16 +268,16 @@ class DateRange(DatePrinter):
 	def __init__(self, name, category, values):
 		day, month, year, day2, month2, year2 = map(int, values)
 		date = datetime.date(year, month, day)
-		date_end = datetime.date(year2, month2, day2)+datetime.timedelta(days=1)
+		date_end = datetime.date(year2, month2, day2) + datetime.timedelta(days=1)
 		self.end_date2 = datetime.date(year2, month2, day2)
 		DatePrinter.__init__(self, name, category, date, date_end)
-	
+
 	def getDetailPlain(self, lang=LANG_DE):
 		dow = day_of_week_str(self.start_date.weekday(), lang)
 		dow2 = day_of_week_str(self.end_date2.weekday(), lang)
 		to = to_in_lang(lang)
 		return "%s, %02d.%02d. %s %s, %02d.%02d.: %s" % (dow, self.start_date.day, self.start_date.month, to, dow2, self.end_date2.day, self.end_date2.month, self.getPlainName())
-	
+
 	def getMediawikiEntry(self, lang=LANG_DE):
 		dow = day_of_week_str(self.start_date.weekday(), lang)
 		dow2 = day_of_week_str(self.end_date2.weekday(), lang)
@@ -286,7 +291,7 @@ class DateTimeRange(DatePrinter):
 		date = tz.localize(datetime.datetime(year, month, day, hour, minute))
 		date_end = tz.localize(datetime.datetime(year2, month2, day2, hour2, minute2))
 		DatePrinter.__init__(self, name, category, date, date_end)
-	
+
 	def getDetailPlain(self, lang=LANG_DE):
 		dow = day_of_week_str(self.start_date.weekday(), lang)
 		dow2 = day_of_week_str(self.end_date.weekday(), lang)
@@ -303,7 +308,7 @@ class DateTimeRange(DatePrinter):
 class Generator:
 	def __init__(self):
 		self.entries = []
-	
+
 	def getIcal(self):
 		if not self.entries:
 			return None
@@ -311,8 +316,9 @@ class Generator:
 		event = first.getIcal()
 		interval = first.rule._interval
 		until = first.rule._until
-		event.add('rrule', {'FREQ': ['WEEKLY'], 'INTERVAL': [interval], 'UNTIL': [until]})		
+		event.add('rrule', {'FREQ': ['WEEKLY'], 'INTERVAL': [interval], 'UNTIL': [until]})
 		return event
+
 
 class WeekdayTimeRangeGenerator(Generator):
 	def __init__(self, name, category, values, rep):
@@ -354,9 +360,9 @@ class WeekdayTimeRangeGenerator(Generator):
 			start2 += datetime.timedelta(days=1)
 		delta = start2 - start
 		stop = tz.localize(datetime.datetime(year2, month2, day2, 0, 0))
-		rule = rrule.rrule(rrule.WEEKLY,interval=interval, byweekday=wd, dtstart=start, until=stop)
+		rule = rrule.rrule(rrule.WEEKLY, interval=interval, byweekday=wd, dtstart=start, until=stop)
 		for event in rule:
-			event_end = event+delta
+			event_end = event + delta
 			if nonetime:
 				self.entries.append(RepSingleDateTime(name, category, (event.day, event.month, event.year, event.hour, event.minute), rule))
 			else:
@@ -365,22 +371,25 @@ class WeekdayTimeRangeGenerator(Generator):
 
 				else:
 					self.entries.append(RepSingleDateTimeRange(name, category, (event.day, event.month, event.year, event.hour, event.minute, event_end.hour, event_end.minute), rule))
-			
-		
+
+
 class RepSingleDateTime(SingleDateTime):
 	def __init__(self, name, category, values, rule):
-		SingleDateTime.__init__(self, name, category ,values)
+		SingleDateTime.__init__(self, name, category, values)
 		self.rule = rule
-		
+
+
 class RepSingleDateTimeRange(SingleDateTimeRange):
 	def __init__(self, name, category, values, rule):
 		SingleDateTimeRange.__init__(self, name, category, values)
 		self.rule = rule
-		
+
+
 class RepDateTimeRange(DateTimeRange):
 	def __init__(self, name, category, values, rule):
 		DateTimeRange.__init__(self, name, category, values)
 		self.rule = rule
+
 
 class WeekdayTimeGenerator(WeekdayTimeRangeGenerator):
 	def __init__(self, name, category, values, rep):
@@ -396,6 +405,7 @@ tests = [(single_date, SingleDate),
 		(weekday_time, WeekdayTimeGenerator),
 		(weekday_time_range, WeekdayTimeRangeGenerator)]
 
+
 def analyze_date(name, category, date, rep):
 	for regex, dateClass in tests:
 		rg = regex.match(date)
@@ -404,6 +414,7 @@ def analyze_date(name, category, date, rep):
 				return dateClass(name, category, rg.groups(), rep)
 			else:
 				return dateClass(name, category, rg.groups())
+
 
 def parse_wiki_page(content):
 	result = []
@@ -422,8 +433,9 @@ def parse_wiki_page(content):
 			result.append(obj)
 	return result
 
+
 def expand_dates(dates):
-	result =[]
+	result = []
 	for date in dates:
 		if issubclass(date.__class__, Generator):
 			result.extend(date.entries)
@@ -431,9 +443,10 @@ def expand_dates(dates):
 			result.append(date)
 	return result
 
+
 def next_up(entries, now_):
 	repeated_events = {}
-	
+
 	now = now_ - datetime.timedelta(hours=1)
 	far_far_away = now + datetime.timedelta(days=MAX_NEXT_UP_REPEATED_DAYS)
 	far_far_far_away = now + datetime.timedelta(days=MAX_NEXT_UP_DAYS)
@@ -444,19 +457,21 @@ def next_up(entries, now_):
 			eventid = entry.getPlainName()
 			if eventid not in repeated_events:
 				repeated_events[eventid] = 0
-			repeated_events[eventid] +=1
+			repeated_events[eventid] += 1
 			if repeated_events[eventid] > MAX_NEXT_UP_REPEATED:
 				continue
 			# repeated events only in the near future
 			if repeated_events[eventid] > 1 and entry.start_datetime() > far_far_away:
 				continue
+
 			# restrict all events to not so fare future
 			if entry.start_datetime() > far_far_far_away:
 				continue
-				
+
 			result.append(entry)
-			
+
 	return result
+
 
 def in_before(entries, now_):
 	repeated_events = {}
@@ -464,21 +479,22 @@ def in_before(entries, now_):
 	lowest = now_ - datetime.timedelta(days=MAX_IN_BEFORE_DAYS)
 	result = []
 	for entry in sorted(entries, reverse=True):
-		if entry.end_datetime() < now  and entry.end_datetime() > lowest:
+		if entry.end_datetime() < now and entry.end_datetime() > lowest:
 			# detect repeating events by nameyy
 			eventid = entry.getPlainName()
 			if eventid not in repeated_events:
 				repeated_events[eventid] = 0
-			repeated_events[eventid] +=1
+			repeated_events[eventid] += 1
 			if repeated_events[eventid] > MAX_IN_BEFORE_REPEATED:
 				continue
-				
+
 			result.append(entry)
-			
+
 	return result
 
+
 def generate_wiki_section(entries, templatefile, lang=LANG_DE, now=None):
-	if now == None:
+	if now is None:
 		now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(tz)
 	result = file(templatefile).read().decode("utf8")
 	next_dates = []
@@ -492,11 +508,13 @@ def generate_wiki_section(entries, templatefile, lang=LANG_DE, now=None):
 	result = result.format(next_dates=next_dates, prev_dates=prev_dates)
 	return result
 
+
 def write_if_changed(filename, content):
 	if not os.path.exists(filename) or content != file(filename).read():
 		f = file(filename, "w")
 		f.write(content)
 		f.close()
+
 
 def generate_ical(entries, filename):
 	cal = ical.Calendar()
@@ -510,7 +528,7 @@ def generate_ical(entries, filename):
 	tzs.add('rrule', {'freq': 'yearly', 'bymonth': 10, 'byday': '-1su'})
 	tzs.add('TZOFFSETFROM', datetime.timedelta(hours=2))
 	tzs.add('TZOFFSETTO', datetime.timedelta(hours=1))
-	
+
 	tzd = ical.TimezoneDaylight()
 	tzd.add('tzname', 'MESZ')
 	tzd.add('dtstart', datetime.datetime(1981, 3, 29, 2, 0, 0))
@@ -522,12 +540,10 @@ def generate_ical(entries, filename):
 	timezone.add_component(tzd)
 	cal.add_component(timezone)
 
-
-
 	cal.add('version', '2.0')
 	cal.add('prodid', '-//willenbot')
 	cal.add('x-wr-calname', 'Stratum 0')
-		
+
 	for entry in entries:
 		component = entry.getIcal()
 		if component:
@@ -544,12 +560,11 @@ def generate_json_css(entries, jsonfile, cssfile):
 		if group not in css:
 			css.append(group)
 		e.append(data)
-	
+
 	result = {
-			"success": 1,
-			"result": e
-	}
-	
+		"success": 1,
+		"result": e}
+
 	write_if_changed(jsonfile, json.dumps(result).encode("utf8"))
 
 	css_content = ""

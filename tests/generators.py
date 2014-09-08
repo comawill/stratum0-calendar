@@ -4,6 +4,7 @@ import tempfile
 import os
 import datetime
 
+
 class TestGenerators(unittest.TestCase):
 	def setUp(self):
 		self.tempdir = tempfile.gettempdir()
@@ -21,7 +22,6 @@ class TestGenerators(unittest.TestCase):
 			cg.SingleDate("Event -1", "cat", (6, 10, 2014)),
 			cg.SingleDate("Event -1", "cat", (7, 10, 2014))]
 
-		
 	def test_GenerateJsonCSS(self):
 		cg.generate_json_css(cg.expand_dates(self.events), self.json_path, self.css_path)
 		os.remove(self.json_path)
@@ -32,5 +32,5 @@ class TestGenerators(unittest.TestCase):
 		os.remove(self.ics_path)
 
 	def test_GenerateWiki(self):
-		now = cg.tz.localize(datetime.datetime(2014,10,10,10,10))
+		now = cg.tz.localize(datetime.datetime(2014, 10, 10, 10, 10))
 		cg.generate_wiki_section(cg.expand_dates(self.events), "templates/termine_haupt.de.wiki", cg.LANG_DE, now=now)

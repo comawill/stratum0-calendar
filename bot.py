@@ -15,6 +15,7 @@ comment = None
 entries = calendargenerator.parse_wiki_page(termine.edit())
 expanded_entries = calendargenerator.expand_dates(entries)
 
+
 def update(entries, page, purge_page, templatefile, lang):
 	global comment
 	page_data = site.Pages[page]
@@ -23,12 +24,12 @@ def update(entries, page, purge_page, templatefile, lang):
 	if old != text:
 		print "updating %s" % page
 		if not comment:
-			rev = termine.revisions(limit = 1, prop = 'timestamp|user|comment').next()
+			rev = termine.revisions(limit=1, prop='timestamp|user|comment').next()
 			changed = datetime.datetime.fromtimestamp(time.mktime(rev["timestamp"]))
 			now = datetime.datetime.utcnow()
 			comment = u"Automatisches Update (irgendwas wird sich schon verändert haben)"
-			if now-changed < datetime.timedelta(minutes=15):
-				comment = u"%s hat Termine aktualisiert (%s) " % (rev["user"] ,rev["comment"])
+			if (now - changed) < datetime.timedelta(minutes=15):
+				comment = u"%s hat Termine aktualisiert (%s) " % (rev["user"], rev["comment"])
 		print comment.encode("utf8")
 		if not site.logged_in:
 			site.login(config.user, config.password)

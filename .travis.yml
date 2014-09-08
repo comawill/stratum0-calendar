@@ -3,7 +3,10 @@ python:
   - "2.7"
 before_install:
   - sudo apt-get update && sudo apt-get --reinstall install -qq language-pack-en language-pack-de language-pack-fr
+  - pip install pep8
 # command to install dependencies
 install: "pip install -r requirements.txt"
 # command to run tests
-script: nosetests
+script:
+  - nosetests
+  - pep8 --ignore=E501,W191,E128 *.py tests/*.py
