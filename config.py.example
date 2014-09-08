@@ -1,0 +1,6 @@
+user = "name-of-the-bot"
+password = "super-secret-password"
+write_wiki = True
+ical = "events.ics"
+json = "events.json"
+css = "category.css"
