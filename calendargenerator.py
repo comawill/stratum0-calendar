@@ -532,7 +532,7 @@ def generate_ical(entries, filename):
 	tzd = ical.TimezoneDaylight()
 	tzd.add('tzname', 'MESZ')
 	tzd.add('dtstart', datetime.datetime(1981, 3, 29, 2, 0, 0))
-	tzs.add('rrule', {'freq': 'yearly', 'bymonth': 3, 'byday': '-1su'})
+	tzd.add('rrule', {'freq': 'yearly', 'bymonth': 3, 'byday': '-1su'})
 	tzd.add('TZOFFSETFROM', datetime.timedelta(hours=1))
 	tzd.add('TZOFFSETTO', datetime.timedelta(hours=2))
 
