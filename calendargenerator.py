@@ -190,6 +190,8 @@ class DatePrinter(object):
 		if self.start_datetime() >= other.start_datetime() and self.end_datetime() < other.end_datetime():
 			return True
 		if self.start_datetime() == other.start_datetime():
+			if self.end_datetime() == other.end_datetime():
+				return self.name < other.name
 			return self.end_datetime() < other.end_datetime()
 		return self.start_datetime() < other.start_datetime()
 
@@ -199,7 +201,7 @@ class DatePrinter(object):
 		return self < other or self == other
 
 	def __eq__(self, other):
-		return self.start_datetime() == other.start_datetime() and self.end_datetime() == other.end_datetime()
+		return self.start_datetime() == other.start_datetime() and self.end_datetime() == other.end_datetime() and self.name == other.name
 
 	def __gt__(self, other):
 		if isinstance(other, datetime.datetime):
@@ -207,6 +209,8 @@ class DatePrinter(object):
 		if self.start_datetime() <= other.start_datetime() and self.end_datetime() > other.end_datetime():
 			return True
 		if self.start_datetime() == other.start_datetime():
+			if self.end_datetime() == other.end_datetime():
+				return self.name > other.name
 			return self.end_datetime() > other.end_datetime()
 		return self.start_datetime() > other.start_datetime()
 

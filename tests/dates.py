@@ -16,13 +16,15 @@ class TestDateOrder(unittest.TestCase):
 		self.sdt2 = cg.SingleDateTime("name", "cat", [23, 8, 2014, 14, 00])
 
 		self.sdt3 = cg.SingleDateTime("name", "cat", [20, 8, 2014, 12, 00])
-		self.sdt4 = cg.SingleDateTime("name", "cat", [20, 8, 2014, 15, 00])
+		self.sdt4 = cg.SingleDateTime("a-name", "cat", [20, 8, 2014, 15, 00])
+		self.sdt5 = cg.SingleDateTime("b-name", "cat", [20, 8, 2014, 15, 00])
 
 		self.sdtr1 = cg.SingleDateTimeRange("name", "cat", [24, 8, 2014, 12, 00, 14, 00])
 		self.sdtr2 = cg.SingleDateTimeRange("name", "cat", [24, 9, 2014, 13, 00, 15, 00])
 
 		self.sdtr3 = cg.SingleDateTimeRange("name", "cat", [24, 8, 2014, 12, 00, 14, 00])
-		self.sdtr4 = cg.SingleDateTimeRange("name", "cat", [24, 8, 2014, 12, 00, 15, 00])
+		self.sdtr4 = cg.SingleDateTimeRange("a-name", "cat", [24, 8, 2014, 12, 00, 15, 00])
+		self.sdtr5 = cg.SingleDateTimeRange("b-name", "cat", [24, 8, 2014, 12, 00, 15, 00])
 
 		self.dr1 = cg.DateRange("name", "cat", [20, 8, 2014, 21, 8, 2014])
 		self.dr2 = cg.DateRange("name", "cat", [20, 9, 2014, 21, 9, 2014])
@@ -71,6 +73,12 @@ class TestDateOrder(unittest.TestCase):
 		self.assertTrue(self.sdt3 < self.sdt4)
 		self.assertTrue(self.sdt4 > self.sdt3)
 
+		self.assertNotEqual(self.sdt4, self.sdt5)
+		self.assertTrue(self.sdt4 < self.sdt5)
+		self.assertFalse(self.sdt4 > self.sdt5)
+		self.assertTrue(self.sdt5 > self.sdt4)
+		self.assertFalse(self.sdt5 < self.sdt4)
+
 	def test_SingleDateTimeRange(self):
 
 		self.assertEqual(self.sdtr1.getMediawikiEntry(), "* So, 24.08. 12:00 - 14:00: name")
@@ -84,6 +92,12 @@ class TestDateOrder(unittest.TestCase):
 
 		self.assertTrue(self.sdtr3 < self.sdtr4)
 		self.assertTrue(self.sdtr4 > self.sdtr3)
+
+		self.assertNotEqual(self.sdtr4, self.sdtr5)
+		self.assertTrue(self.sdtr4 < self.sdtr5)
+		self.assertFalse(self.sdtr4 > self.sdtr5)
+		self.assertTrue(self.sdtr5 > self.sdtr4)
+		self.assertFalse(self.sdtr5 < self.sdtr4)
 
 	def test_DateRange(self):
 
