@@ -39,8 +39,8 @@ date_range_time = re.compile("^(\d+)\.(\d+)\.(\d+)\s+(\d+)[:\.](\d+)\s*\-\s*(\d+
 weekday_time = re.compile("^([a-zA-Z0-9/]+),?\s*(\d+)[:\.](\d+)$")
 weekday_time_range = re.compile("^([a-zA-Z0-9/]+),?\s*(\d+)[:\.](\d+)\s*\-\s*(\d+)[:\.](\d+)$")
 
-mediawiki_intern_link = re.compile(r"(\[\[([^|]+)\|?(.*)\]\])")
-mediawiki_extern_link = re.compile(r"(\[([^\ ]+)\s+(.*)\])")
+mediawiki_intern_link = re.compile(r"(\[\[([^|]+)\|?(.*?)\]\])")
+mediawiki_extern_link = re.compile(r"(\[([^\ ]+)\s+(.*?)\])")
 mediawiki_emph = re.compile(r"''(.*?)''")
 
 category_re = re.compile(r"==([^=]+)==")
