@@ -510,7 +510,7 @@ def generate_wiki_section(entries, templatefile, lang=LANG_DE, now=None):
 		prev_dates.append(i.getMediawikiEntry(lang=lang))
 	prev_dates = "\n".join(prev_dates)
 	result = result.format(next_dates=next_dates, prev_dates=prev_dates)
-	return result
+	return result.strip()
 
 
 def write_if_changed(filename, content):
