@@ -1,3 +1,4 @@
+# -*- coding: utf8 -.-
 import unittest
 import calendargenerator as cg
 import datetime
@@ -16,6 +17,15 @@ class TestUrls(unittest.TestCase):
 		url_date = cg.SingleDate("abc [[test_url]]", "cat", [20, 9, 2014])
 		self.assertEqual(url_date.getURL(), "https://stratum0.org/wiki/test_url")
 		self.assertEqual(url_date.getPlainName(), "abc test_url")
+
+	def test_internUmlautUrl(self):
+		url_date = cg.SingleDate(u"[[test_ürl]]", "cat", [20, 9, 2014])
+		self.assertEqual(url_date.getURL(), u"https://stratum0.org/wiki/test_%c3%bcrl")
+		self.assertEqual(url_date.getPlainName(), u"test_ürl")
+
+		url_date2 = cg.SingleDate(u"[[test_ürlä]]", "cat", [20, 9, 2014])
+		self.assertEqual(url_date2.getURL(), u"https://stratum0.org/wiki/test_%c3%bcrl%c3%a4")
+		self.assertEqual(url_date2.getPlainName(), u"test_ürlä")
 
 	def test_externUrl(self):
 		url_date = cg.SingleDate("abc [https://stratum0.net/ title]", "cat", [20, 9, 2014])

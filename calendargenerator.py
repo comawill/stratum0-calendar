@@ -95,7 +95,16 @@ def to_in_lang(lang):
 
 
 def make_extern(intern_url):
-	return "https://stratum0.org/wiki/%s" % intern_url.replace(" ", "_")
+	intern_url = intern_url.replace(" ", "_")
+
+	def urldecode(match):
+		result = ""
+		for c in match.groups()[0].encode("utf8"):
+			result += "%%%02x" % ord(c)
+		return result
+
+	intern_url = re.sub("([\x7f-\xff]+)", urldecode, intern_url)
+	return "https://stratum0.org/wiki/%s" % intern_url
 
 
 def date2datetime(date):
