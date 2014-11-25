@@ -59,6 +59,18 @@ class TestPlainName(unittest.TestCase):
 		url_date = cg.SingleDate("abc ''def'' ''ghi''", "cat", [20, 9, 2014])
 		self.assertEqual(url_date.getPlainName(), "abc def ghi")
 
+	def test_bold_emph(self):
+		url_date = cg.SingleDate("abc '''def''' ''ghi''", "cat", [20, 9, 2014])
+		self.assertEqual(url_date.getPlainName(), "abc def ghi")
+
+	def test_bold(self):
+		url_date = cg.SingleDate("abc '''def'''", "cat", [20, 9, 2014])
+		self.assertEqual(url_date.getPlainName(), "abc def")
+
+	def test_double_bold(self):
+		url_date = cg.SingleDate("abc '''def''' '''ghi'''", "cat", [20, 9, 2014])
+		self.assertEqual(url_date.getPlainName(), "abc def ghi")
+
 
 class TestWikiParser(unittest.TestCase):
 	def setUp(self):

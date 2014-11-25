@@ -41,6 +41,7 @@ weekday_time_range = re.compile("^([a-zA-Z0-9/]+),?\s*(\d+)[:\.](\d+)\s*\-\s*(\d
 
 mediawiki_intern_link = re.compile(r"(\[\[([^|]+)\|?(.*?)\]\])")
 mediawiki_extern_link = re.compile(r"(\[([^\ ]+)\s+(.*?)\])")
+mediawiki_bold = re.compile(r"'''(.*?)'''")
 mediawiki_emph = re.compile(r"''(.*?)''")
 
 category_re = re.compile(r"==([^=]+)==")
@@ -158,6 +159,7 @@ class DatePrinter(object):
 			return url
 		name = mediawiki_intern_link.sub(fix_intern, self.name)
 		name = mediawiki_extern_link.sub(r"\3", name)
+		name = mediawiki_bold.sub(r"\1", name)
 		name = mediawiki_emph.sub(r"\1", name)
 		return name
 
