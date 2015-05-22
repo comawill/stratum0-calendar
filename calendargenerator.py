@@ -11,6 +11,7 @@ import md5
 import string
 import os
 import json
+import sys
 
 TIMEZONE = 'Europe/Berlin'
 DEFAULT_DURATION = 3  # 3h
@@ -112,6 +113,10 @@ def date2datetime(date):
 	return tz.localize(datetime.datetime(date.year, date.month, date.day, 0, 0))
 
 
+class InvalidDateEntryException(Exception):
+	pass
+
+
 class DatePrinter(object):
 	def __init__(self, name, category, start_date, end_date):
 		self.name = name
@@ -119,6 +124,8 @@ class DatePrinter(object):
 		self.start_date = start_date
 		self.end_date = end_date
 		self.category = category
+		if self.end_date <= self.start_date:
+			raise InvalidDateEntryException
 
 	def getIcal(self):
 		event = ical.Event()
@@ -268,6 +275,8 @@ class SingleDateTimeRange(DatePrinter):
 		day, month, year, hour, minute, hour2, minute2 = map(int, values)
 		date = tz.localize(datetime.datetime(year, month, day, hour, minute))
 		date_end = tz.localize(datetime.datetime(year, month, day, hour2, minute2))
+		if date_end < date:
+			date_end += datetime.timedelta(days=1)
 		DatePrinter.__init__(self, name, category, date, date_end)
 
 	def getDetailPlain(self, lang=LANG_DE):
@@ -423,12 +432,17 @@ tests = [(single_date, SingleDate),
 
 def analyze_date(name, category, date, rep):
 	for regex, dateClass in tests:
-		rg = regex.match(date)
-		if rg:
-			if issubclass(dateClass, Generator):
-				return dateClass(name, category, rg.groups(), rep)
-			else:
-				return dateClass(name, category, rg.groups())
+		try:
+			rg = regex.match(date)
+			if rg:
+				if issubclass(dateClass, Generator):
+					return dateClass(name, category, rg.groups(), rep)
+				else:
+					return dateClass(name, category, rg.groups())
+		except InvalidDateEntryException:
+			sys.stderr.write("InvalidDate: %s %s %s %s\n" % (name, category, date, rep))
+			sys.stderr.flush()
+			return
 
 
 def parse_wiki_page(content):

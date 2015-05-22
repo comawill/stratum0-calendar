@@ -79,6 +79,13 @@ class TestWikiParser(unittest.TestCase):
 	def test_parseWiki(self):
 		now = cg.tz.localize(datetime.datetime(2014, 10, 10, 10, 10))
 		result = cg.parse_wiki_page(file("tests/wiki/general.wiki").read().decode("utf8"))
+		for entry in result:
+			if isinstance(entry, cg.Generator):
+				for subentry in entry.entries:
+					self.assertLessEqual(subentry.start_datetime(), subentry.end_datetime())
+			else:
+				self.assertLessEqual(entry.start_datetime(), entry.end_datetime())
+
 		cg.generate_wiki_section(cg.expand_dates(result), "templates/termine_haupt.de.wiki", cg.LANG_DE, now=now)
 		cg.generate_ical(result, "/dev/null")
 		self.assertEqual(len(result), 13)

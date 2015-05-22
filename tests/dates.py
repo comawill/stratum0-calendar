@@ -30,7 +30,7 @@ class TestDateOrder(unittest.TestCase):
 		self.dr2 = cg.DateRange("name", "cat", [20, 9, 2014, 21, 9, 2014])
 
 		self.dtr1 = cg.DateTimeRange("name", "cat", [20, 8, 2014, 12, 00, 21, 8, 2014, 14, 00])
-		self.dtr2 = cg.DateTimeRange("name", "cat", [20, 9, 2014, 13, 00, 21, 8, 2014, 15, 00])
+		self.dtr2 = cg.DateTimeRange("name", "cat", [20, 9, 2014, 13, 00, 21, 9, 2014, 15, 00])
 
 	def test_compareDatetime(self):
 		self.assertTrue(self.sd1 > self.datetime1)
