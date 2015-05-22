@@ -13,6 +13,7 @@ import os
 import json
 import sys
 
+
 TIMEZONE = 'Europe/Berlin'
 DEFAULT_DURATION = 3  # 3h
 MAX_NEXT_UP_REPEATED = 3
@@ -21,6 +22,11 @@ MAX_NEXT_UP_DAYS = 31 * 3
 MAX_IN_BEFORE_REPEATED = 1
 MAX_IN_BEFORE_DAYS = 31
 
+T_CATEGORY = "category"
+T_EVENT = "date"
+T_INVALID_EVENT = "invalid date"
+T_ROW_DIVIDER = "row divider"
+T_REST = "rest"
 
 LANG_DE = "de_DE.UTF-8"
 LANG_EN = "en_US.UTF-8"
@@ -30,23 +36,23 @@ LANG_FR = "fr_CA.UTF-8"
 tz = pytz.timezone('Europe/Berlin')
 
 
-entry = re.compile("^\|\s*(.*?)\s*\|\|\s*(.*?)\s*\|\|\s*(.*?)\s*$")
+entry = re.compile(r"^\|\s*(.*?)\s*\|\|\s*(.*?)\s*\|\|\s*(.*?)\s*$")
 
-single_date = re.compile("^(\d+)\.(\d+)\.(\d+)$")
-single_date_time = re.compile("^(\d+)\.(\d+)\.(\d+)\s+(\d+)[:\.](\d+)$")
-single_date_time_range = re.compile("^(\d+)\.(\d+)\.(\d+)\s+(\d+)[:\.](\d+)\s*\-\s*(\d+)[:\.](\d+)$")
-date_range = re.compile("^(\d+)\.(\d+)\.(\d+)\s*\-\s*(\d+)\.(\d+)\.(\d+)$")
-date_range_time = re.compile("^(\d+)\.(\d+)\.(\d+)\s+(\d+)[:\.](\d+)\s*\-\s*(\d+)\.(\d+)\.(\d+)\s+(\d+)[:\.](\d+)$")
-weekday_time = re.compile("^([a-zA-Z0-9/]+),?\s*(\d+)[:\.](\d+)$")
-weekday_time_range = re.compile("^([a-zA-Z0-9/]+),?\s*(\d+)[:\.](\d+)\s*\-\s*(\d+)[:\.](\d+)$")
+single_date = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")
+single_date_time = re.compile(r"^(\d+)\.(\d+)\.(\d+)\s+(\d+)[:\.](\d+)$")
+single_date_time_range = re.compile(r"^(\d+)\.(\d+)\.(\d+)\s+(\d+)[:\.](\d+)\s*\-\s*(\d+)[:\.](\d+)$")
+date_range = re.compile(r"^(\d+)\.(\d+)\.(\d+)\s*\-\s*(\d+)\.(\d+)\.(\d+)$")
+date_range_time = re.compile(r"^(\d+)\.(\d+)\.(\d+)\s+(\d+)[:\.](\d+)\s*\-\s*(\d+)\.(\d+)\.(\d+)\s+(\d+)[:\.](\d+)$")
+weekday_time = re.compile(r"^([a-zA-Z0-9/]+),?\s*(\d+)[:\.](\d+)$")
+weekday_time_range = re.compile(r"^([a-zA-Z0-9/]+),?\s*(\d+)[:\.](\d+)\s*\-\s*(\d+)[:\.](\d+)$")
 
 mediawiki_intern_link = re.compile(r"(\[\[([^|]+)\|?(.*?)\]\])")
 mediawiki_extern_link = re.compile(r"(\[([^\ ]+)\s+(.*?)\])")
 mediawiki_bold = re.compile(r"'''(.*?)'''")
 mediawiki_emph = re.compile(r"''(.*?)''")
 
-category_re = re.compile(r"==([^=]+)==")
-
+category_re = re.compile(r"^==([^=]+)==$")
+divider_re = re.compile(r"^\|-$")
 
 dow_regex = re.compile(r"^(\w+)(|/(\d+))$")
 dow_index = {
@@ -64,6 +70,8 @@ dow_index = {
 	"sat": 5,
 	"so": 6,
 	"sun": 6}
+
+dow_list = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
 
 
 def simple_name(name):
@@ -146,8 +154,16 @@ class DatePrinter(object):
 		result["class"] = "event-%s" % simple_name(self.category)
 		result["start"] = int(time.mktime(self.start_date.timetuple()) * 1000)
 		result["end"] = int(time.mktime(self.end_date.timetuple()) * 1000) - 1
-
 		return result
+
+	def getMediawikiRow(self):
+		return ("| %s || %s ||" % (self.getMediawikiName(), self.getDateString()))
+
+	def getDateString(self):
+		raise Exception("not implemented")
+
+	def getDateRangeString(self):
+		raise Exception("not implemented")
 
 	def getMediawikiEntry(self, lang=LANG_DE):
 		raise Exception("not implemented")
@@ -253,6 +269,9 @@ class SingleDate(DatePrinter):
 		dow = day_of_week_str(self.start_date.weekday(), lang)
 		return "* %s, %02d.%02d.: %s" % (dow, self.start_date.day, self.start_date.month, self.getMediawikiName())
 
+	def getDateString(self):
+		return "%02d.%02d.%02d" % (self.start_date.day, self.start_date.month, self.start_date.year)
+
 
 class SingleDateTime(DatePrinter):
 	def __init__(self, name, category, values):
@@ -268,6 +287,9 @@ class SingleDateTime(DatePrinter):
 	def getMediawikiEntry(self, lang=LANG_DE):
 		dow = day_of_week_str(self.start_date.weekday(), lang)
 		return "* %s, %02d.%02d. %02d:%02d: %s" % (dow, self.start_date.day, self.start_date.month, self.start_date.hour, self.start_date.minute, self.getMediawikiName())
+
+	def getDateString(self):
+		return "%02d.%02d.%02d %02d:%02d" % (self.start_date.day, self.start_date.month, self.start_date.year, self.start_date.hour, self.start_date.minute)
 
 
 class SingleDateTimeRange(DatePrinter):
@@ -286,6 +308,9 @@ class SingleDateTimeRange(DatePrinter):
 	def getMediawikiEntry(self, lang=LANG_DE):
 		dow = day_of_week_str(self.start_date.weekday(), lang)
 		return "* %s, %02d.%02d. %02d:%02d - %02d:%02d: %s" % (dow, self.start_date.day, self.start_date.month, self.start_date.hour, self.start_date.minute, self.end_date.hour, self.end_date.minute, self.getMediawikiName())
+
+	def getDateString(self):
+		return "%02d.%02d.%02d %02d:%02d - %02d:%02d" % (self.start_date.day, self.start_date.month, self.start_date.year, self.start_date.hour, self.start_date.minute, self.end_date.hour, self.end_date.minute)
 
 
 class DateRange(DatePrinter):
@@ -308,6 +333,9 @@ class DateRange(DatePrinter):
 		to = to_in_lang(lang)
 		return "* %s, %02d.%02d. %s %s, %02d.%02d.: %s" % (dow, self.start_date.day, self.start_date.month, to, dow2, self.end_date2.day, self.end_date2.month, self.getMediawikiName())
 
+	def getDateString(self):
+		return "%02d.%02d.%02d - %02d.%02d.%02d" % (self.start_date.day, self.start_date.month, self.start_date.year, self.end_date2.day, self.end_date2.month, self.end_date2.year)
+
 
 class DateTimeRange(DatePrinter):
 	def __init__(self, name, category, values):
@@ -328,6 +356,9 @@ class DateTimeRange(DatePrinter):
 		to = to_in_lang(lang)
 		return "* %s, %02d.%02d. %02d:%02d %s %s, %02d.%02d. %02d:%02d: %s" % (dow, self.start_date.day, self.start_date.month, self.start_date.hour, self.start_date.minute, to, dow2, self.end_date.day, self.end_date.month, self.end_date.hour, self.end_date.minute, self.getMediawikiName())
 
+	def getDateString(self):
+		return "%02d.%02d.%02d %02d:%02d - %02d.%02d.%02d %02d:%02d" % (self.start_date.day, self.start_date.month, self.start_date.year, self.start_date.hour, self.start_date.minute, self.end_date.day, self.end_date.month, self.end_date.year, self.end_date.hour, self.end_date.minute)
+
 
 class Generator:
 	def __init__(self):
@@ -343,10 +374,39 @@ class Generator:
 		event.add('rrule', {'FREQ': ['WEEKLY'], 'INTERVAL': [interval], 'UNTIL': [until]})
 		return event
 
+	def getMediawikiRow(self):
+		first = self.entries[0]
+		return ("| %s || %s || %s" % (first.getMediawikiName(), self.getDateString(), self.getDateRangeString())).strip()
+
+	def getDateString(self):
+		first = self.entries[0]
+		interval = first.rule._interval
+		if interval > 1:
+			interval = "/%d" % interval
+		else:
+			interval = ""
+		return "%s%s, %s" % (dow_list[first.start_date.weekday()], interval, first.getDateString())
+
+	def getDateRangeString(self):
+		first = self.entries[0]
+		start = first.start_date
+		end = first.rule._until
+		return "%02d.%02d.%04d - %02d.%02d.%04d" % (start.day, start.month, start.year, end.day, end.month, end.year)
+
+	def __lt__(self, other):
+		return self.entries[-1] < other
+
+	def start_datetime(self):
+		return self.entries[0].start_datetime()
+
+	def end_datetime(self):
+		return self.entries[-1].end_datetime()
+
 
 class WeekdayTimeRangeGenerator(Generator):
 	def __init__(self, name, category, values, rep):
 		Generator.__init__(self)
+		self.category = category
 		nonetime = False
 		self.entries = []
 		rep = date_range.match(rep)
@@ -402,11 +462,17 @@ class RepSingleDateTime(SingleDateTime):
 		SingleDateTime.__init__(self, name, category, values)
 		self.rule = rule
 
+	def getDateString(self):
+		return "%02d:%02d" % (self.start_date.hour, self.start_date.minute)
+
 
 class RepSingleDateTimeRange(SingleDateTimeRange):
 	def __init__(self, name, category, values, rule):
 		SingleDateTimeRange.__init__(self, name, category, values)
 		self.rule = rule
+
+	def getDateString(self):
+		return "%02d:%02d - %02d:%02d" % (self.start_date.hour, self.start_date.minute, self.end_date.hour, self.end_date.minute)
 
 
 class RepDateTimeRange(DateTimeRange):
@@ -445,7 +511,7 @@ def analyze_date(name, category, date, rep):
 			return
 
 
-def parse_wiki_page(content):
+def tokenize_wiki_page(content):
 	result = []
 	category = None
 	for line in content.splitlines(False):
@@ -455,12 +521,110 @@ def parse_wiki_page(content):
 			new_cat = category_re.match(line)
 			if new_cat:
 				category = new_cat.group(1).strip()
+				result.append((T_CATEGORY, category))
+				continue
+			divider = divider_re.match(line)
+			if divider:
+				result.append((T_ROW_DIVIDER, None))
+				continue
+			result.append((T_REST, line))
 			continue
 		name, date, rep = dateinfo.groups()
 		obj = analyze_date(name, category, date, rep)
 		if obj:
-			result.append(obj)
+			result.append((T_EVENT, obj))
+		else:
+			result.append((T_INVALID_EVENT, line))
 	return result
+
+
+def parse_wiki_page(content):
+	result = []
+	category = None
+	for token, value in tokenize_wiki_page(content):
+		if token == T_EVENT:
+			result.append(value)
+	return result
+
+
+def parse_wiki_page_ordered(pagedata):
+	ordered_categories = []
+	category = None
+	events = {}
+	for token, value in tokenize_wiki_page(pagedata):
+		if token == T_CATEGORY:
+			category = value
+			if category not in ordered_categories:
+				ordered_categories.append(category)
+				events[category] = []
+		elif token == T_EVENT:
+			events[category].append(value)
+	return ordered_categories, events
+
+
+def move_to_archive(events_text, archive_text, threshold_date):
+	n = 0
+	events_categories, _ = parse_wiki_page_ordered(events_text)
+	archive_categories, archive_events = parse_wiki_page_ordered(archive_text)
+
+	archive_final_categories = list(events_categories)
+	for category in archive_categories:
+		if category not in archive_final_categories:
+			archive_final_categories.append(category)
+
+	flatend = []
+	skip_divider = False
+	for token, value in tokenize_wiki_page(events_text):
+		if token == T_EVENT:
+			if value < threshold_date:
+				if value.category not in archive_events:
+					archive_events[value.category] = []
+				archive_events[value.category].append(value)
+				n += 1
+				skip_divider = True
+				continue
+		elif token in (T_CATEGORY, T_REST, T_INVALID_EVENT):
+			skip_divider = False
+		elif token == T_ROW_DIVIDER and skip_divider:
+			skip_divider = False
+			continue
+		flatend.append((token, value))
+
+	archive_flatend = [(T_REST, u"= Termine Archiv =")]
+	for category in archive_final_categories:
+		if category in archive_events and archive_events[category]:
+			archive_flatend.append((T_CATEGORY, category))
+			archive_flatend.append((T_REST, u"{| class=\"prettytable\""))
+			archive_flatend.append((T_REST, u"! Event !! Termin !! Im Zeitraum"))
+			for event in sorted(archive_events[category]):
+				archive_flatend.append((T_ROW_DIVIDER, None))
+				archive_flatend.append((T_EVENT, event))
+
+			archive_flatend.append((T_REST, u"|}\n"))
+
+	new_events = render_page(flatend)
+	new_archive = render_page(archive_flatend)
+
+	return new_events, new_archive, n
+
+
+def render_page(flatend):
+	r = u""
+	for token, value in flatend:
+		if token == T_REST:
+			r += u"%s\n" % value
+		elif token == T_CATEGORY:
+			r += u"== %s ==\n" % value
+		elif token == T_ROW_DIVIDER:
+			r += u"|-\n"
+		elif token == T_EVENT:
+			r += u"%s\n" % value.getMediawikiRow()
+		elif token == T_INVALID_EVENT:
+			r += u"%s\n" % value
+			print str(token), repr(value)
+		else:
+			print str(token), repr(value)
+	return r.strip()
 
 
 def expand_dates(dates):

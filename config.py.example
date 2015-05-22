@@ -3,6 +3,7 @@ server = "stratum0.org"
 user = "name-of-the-bot"
 password = "super-secret-password"
 write_wiki = True
+archive_threshold_days = 31 * 3
 ical = "events.ics"
 json = "events.json"
 css = "category.css"
