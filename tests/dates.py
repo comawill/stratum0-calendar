@@ -117,6 +117,19 @@ class TestDateOrder(unittest.TestCase):
 		self.assertTrue(self.dtr1 < self.dtr2)
 		self.assertTrue(self.dtr2 > self.dtr1)
 
+	def test_WeekdayGeneratorEntries(self):
+		generator = cg.WeekdayTimeGenerator("Event something", "cats", ("Mo", 13, 15), "01.06.2015 - 29.06.2015")
+		start = generator.entries[0].start_datetime()
+		end = generator.entries[-1].start_datetime()
+		self.assertEqual(start.day, 1)
+		self.assertEqual(start.month, 6)
+		self.assertEqual(start.year, 2015)
+
+		self.assertEqual(end.day, 29)
+		self.assertEqual(end.month, 6)
+		self.assertEqual(end.year, 2015)
+		self.assertEqual(len(generator.entries), 5)
+
 	def test_WeekdayMidnight(self):
 		generator = cg.WeekdayTimeRangeGenerator("name", "cat", ("do", 23, 0, 3, 14), ("1.1.2014 - 31.12.2014"))
 		self.assertTrue((generator.entries[0].end_datetime() - generator.entries[0].start_datetime()).total_seconds() > 0)

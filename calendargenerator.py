@@ -383,7 +383,7 @@ class WeekdayTimeRangeGenerator(Generator):
 		if start2 < start:
 			start2 += datetime.timedelta(days=1)
 		delta = start2 - start
-		stop = tz.localize(datetime.datetime(year2, month2, day2, 0, 0))
+		stop = tz.localize(datetime.datetime(year2, month2, day2, 23, 59))
 		rule = rrule.rrule(rrule.WEEKLY, interval=interval, byweekday=wd, dtstart=start, until=stop)
 		for event in rule:
 			event_end = event + delta
