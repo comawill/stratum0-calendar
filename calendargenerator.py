@@ -7,7 +7,7 @@ from dateutil import rrule
 import icalendar as ical
 import pytz
 import calendar
-import md5
+import hashlib
 import string
 import os
 import json
@@ -129,7 +129,7 @@ class DatePrinter(object):
 
 	def getIcal(self):
 		event = ical.Event()
-		event.add('uid', md5.new(self.name.encode("utf8") + str(self.start_date)).hexdigest() + "@stratum0.org")
+		event.add('uid', hashlib.md5(self.name.encode("utf8") + str(self.start_date)).hexdigest() + "@stratum0.org")
 		event.add('summary', self.getPlainName().encode("utf8"))
 		url = self.getURL()
 		if url:
@@ -140,7 +140,7 @@ class DatePrinter(object):
 
 	def getJson(self):
 		result = {}
-		result["id"] = md5.new(self.getPlainName().encode("utf8")).hexdigest()
+		result["id"] = hashlib.md5(self.getPlainName().encode("utf8")).hexdigest()
 		result["title"] = self.getDetailPlain()
 		result["url"] = self.getURL()
 		result["class"] = "event-%s" % simple_name(self.category)
@@ -598,6 +598,6 @@ def generate_json_css(entries, jsonfile, cssfile):
 
 	css_content = ""
 	for group in css:
-		color = "".join(map(lambda a: chr(int(a * 2, 16) | 0x1F).encode("hex"), list(md5.new(group).hexdigest()[:3])))
+		color = "".join(map(lambda a: chr(int(a * 2, 16) | 0x1F).encode("hex"), list(hashlib.md5(group).hexdigest()[:3])))
 		css_content += ".{name},.dh-{name} {{background-color:#{color};}}\n".format(name=group, color=color)
 	write_if_changed(cssfile, css_content)
