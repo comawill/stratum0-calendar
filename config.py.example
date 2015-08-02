@@ -1,3 +1,5 @@
+protocol = "https"
+server = "stratum0.org"
 user = "name-of-the-bot"
 password = "super-secret-password"
 write_wiki = True

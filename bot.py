@@ -8,7 +8,7 @@ import calendargenerator
 import os
 import requests
 
-site = mwclient.Site(('https', 'stratum0.org'), path="/mediawiki/")
+site = mwclient.Site((config.protocol, config.server), path="/mediawiki/")
 
 termine = site.Pages["Termine"]
 comment = None
