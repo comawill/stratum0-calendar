@@ -6,7 +6,6 @@ import time
 import config
 import calendargenerator
 import os
-import requests
 
 site = mwclient.Site((config.protocol, config.server), path="/mediawiki/")
 
@@ -18,6 +17,7 @@ expanded_entries = calendargenerator.expand_dates(entries)
 
 def update(entries, page, purge_page, templatefile, lang):
 	global comment
+	templatefile = os.path.join(os.path.dirname(__file__), templatefile)
 	page_data = site.Pages[page]
 	old = page_data.text()
 	text = calendargenerator.generate_wiki_section(entries, templatefile, lang)
@@ -42,9 +42,9 @@ def update(entries, page, purge_page, templatefile, lang):
 		else:
 			print "no write"
 
-update(expanded_entries, "Template:Termine/de", "Hauptseite", os.path.join(os.path.dirname(__file__), "templates/termine_haupt.de.wiki"), calendargenerator.LANG_DE)
-update(expanded_entries, "Template:Termine/en", "English", os.path.join(os.path.dirname(__file__), "templates/termine_haupt.en.wiki"), calendargenerator.LANG_EN)
-update(expanded_entries, "Template:Termine/fr", u"Français", os.path.join(os.path.dirname(__file__), "templates/termine_haupt.fr.wiki"), calendargenerator.LANG_FR)
+update(expanded_entries, "Template:Termine/de", "Hauptseite", "templates/termine_haupt.de.wiki", calendargenerator.LANG_DE)
+update(expanded_entries, "Template:Termine/en", "English", "templates/termine_haupt.en.wiki", calendargenerator.LANG_EN)
+update(expanded_entries, "Template:Termine/fr", u"Français", "templates/termine_haupt.fr.wiki", calendargenerator.LANG_FR)
 
 calendargenerator.generate_ical(entries, config.ical)
 calendargenerator.generate_json_css(expanded_entries, config.json, config.css)
