@@ -8,7 +8,7 @@ import calendargenerator
 site = mwclient.Site(('https', 'stratum0.org'), path="/mediawiki/")
 
 termine = site.Pages["Termine"]
-data = termine.edit()
+data = termine.text()
 parsed = calendargenerator.expand_dates(calendargenerator.parse_wiki_page(data))
 
 print(calendargenerator.generate_wiki_section(parsed, "templates/termine_haupt.de.wiki", calendargenerator.LANG_DE))
