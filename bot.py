@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -.- encoding: utf-8 -.-
 import mwclient
 import datetime
@@ -22,7 +22,7 @@ def update(entries, page, purge_page, templatefile, lang):
 	old = page_data.text()
 	text = calendargenerator.generate_wiki_section(entries, templatefile, lang)
 	if old != text:
-		print "updating %s" % page
+		print("updating %s" % page)
 		if not comment:
 			rev = termine.revisions(limit=1, prop='timestamp|user|comment').next()
 			changed = datetime.datetime.fromtimestamp(time.mktime(rev["timestamp"]))
@@ -30,7 +30,7 @@ def update(entries, page, purge_page, templatefile, lang):
 			comment = u"Automatisches Update (irgendwas wird sich schon verändert haben)"
 			if (now - changed) < datetime.timedelta(minutes=15):
 				comment = u"%s hat Termine aktualisiert (%s) " % (rev["user"], rev["comment"])
-		print comment.encode("utf8")
+		print(comment)
 		if not site.logged_in:
 			site.login(config.user, config.password)
 		if config.write_wiki:
@@ -40,7 +40,7 @@ def update(entries, page, purge_page, templatefile, lang):
 			except mwclient.errors.HTTPRedirectError:
 				pass
 		else:
-			print "no write"
+			print("no write")
 
 update(expanded_entries, "Template:Termine/de", "Hauptseite", "templates/termine_haupt.de.wiki", calendargenerator.LANG_DE)
 update(expanded_entries, "Template:Termine/en", "English", "templates/termine_haupt.en.wiki", calendargenerator.LANG_EN)

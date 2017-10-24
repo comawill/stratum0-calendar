@@ -20,11 +20,11 @@ class TestUrls(unittest.TestCase):
 
 	def test_internUmlautUrl(self):
 		url_date = cg.SingleDate(u"[[test_ürl]]", "cat", [20, 9, 2014])
-		self.assertEqual(url_date.getURL(), u"https://stratum0.org/wiki/test_%c3%bcrl")
+		self.assertEqual(url_date.getURL(), u"https://stratum0.org/wiki/test_%C3%BCrl")
 		self.assertEqual(url_date.getPlainName(), u"test_ürl")
 
 		url_date2 = cg.SingleDate(u"[[test_ürlä]]", "cat", [20, 9, 2014])
-		self.assertEqual(url_date2.getURL(), u"https://stratum0.org/wiki/test_%c3%bcrl%c3%a4")
+		self.assertEqual(url_date2.getURL(), u"https://stratum0.org/wiki/test_%C3%BCrl%C3%A4")
 		self.assertEqual(url_date2.getPlainName(), u"test_ürlä")
 
 	def test_externUrl(self):
@@ -78,7 +78,7 @@ class TestWikiParser(unittest.TestCase):
 
 	def test_parseWiki(self):
 		now = cg.tz.localize(datetime.datetime(2014, 10, 10, 10, 10))
-		result = cg.parse_wiki_page(file("tests/wiki/general.wiki").read().decode("utf8"))
+		result = cg.parse_wiki_page(open("tests/wiki/general.wiki").read())
 		for entry in result:
 			if isinstance(entry, cg.Generator):
 				for subentry in entry.entries:
@@ -92,7 +92,7 @@ class TestWikiParser(unittest.TestCase):
 
 	def test_parseWiki_wrongWeekday(self):
 		now = cg.tz.localize(datetime.datetime(2014, 10, 10, 10, 10))
-		result = cg.parse_wiki_page(file("tests/wiki/wrong_weekday.wiki").read().decode("utf8"))
+		result = cg.parse_wiki_page(open("tests/wiki/wrong_weekday.wiki").read())
 		self.assertEqual(len(result), 1)
 		self.assertEqual(len(cg.expand_dates(result)), 0)
 		cg.generate_wiki_section(cg.expand_dates(result), "templates/termine_haupt.de.wiki", cg.LANG_DE, now=now)
@@ -100,7 +100,7 @@ class TestWikiParser(unittest.TestCase):
 
 	def test_parseWiki_wrongTime(self):
 		now = cg.tz.localize(datetime.datetime(2014, 10, 10, 10, 10))
-		result = cg.parse_wiki_page(file("tests/wiki/wrong_time.wiki").read().decode("utf8"))
+		result = cg.parse_wiki_page(open("tests/wiki/wrong_time.wiki").read())
 		self.assertEqual(len(result), 1)
 		cg.generate_wiki_section(cg.expand_dates(result), "templates/termine_haupt.de.wiki", cg.LANG_DE, now=now)
 		cg.generate_ical(result, "/dev/null")

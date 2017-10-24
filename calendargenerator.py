@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -.- encoding: utf-8 -.-
 import re
 import datetime
@@ -7,11 +7,13 @@ from dateutil import rrule
 import icalendar as ical
 import pytz
 import calendar
+import locale
 import hashlib
 import string
 import os
 import json
 import sys
+import urllib.parse
 
 
 TIMEZONE = 'Europe/Berlin'
@@ -76,7 +78,7 @@ dow_list = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
 
 def simple_name(name):
 	name = name.lower()
-	ok = string.digits + string.lowercase
+	ok = string.digits + string.ascii_lowercase
 	new_name = []
 	for char in name:
 		if char in ok:
@@ -84,9 +86,9 @@ def simple_name(name):
 	return "".join(new_name)
 
 
-def day_of_week_str(day_of_week, lang):
-	with calendar.TimeEncoding(lang):
-		return calendar.day_abbr[day_of_week].title()
+def day_of_week_str(day_of_week, lang=LANG_EN):
+	locale.setlocale(locale.LC_ALL, lang)
+	return calendar.day_abbr[day_of_week].title()
 
 
 def short_lang(lang):
@@ -106,15 +108,7 @@ def to_in_lang(lang):
 
 def make_extern(intern_url):
 	intern_url = intern_url.replace(" ", "_")
-
-	def urldecode(match):
-		result = ""
-		for c in match.groups()[0].encode("utf8"):
-			result += "%%%02x" % ord(c)
-		return result
-
-	intern_url = re.sub("([\x7f-\xff]+)", urldecode, intern_url)
-	return "https://stratum0.org/wiki/%s" % intern_url
+	return "https://stratum0.org/wiki/%s" % urllib.parse.quote(intern_url)
 
 
 def date2datetime(date):
@@ -137,7 +131,7 @@ class DatePrinter(object):
 
 	def getIcal(self):
 		event = ical.Event()
-		event.add('uid', hashlib.md5(self.name.encode("utf8") + str(self.start_date)).hexdigest() + "@stratum0.org")
+		event.add('uid', hashlib.md5(self.name.encode("utf8") + str(self.start_date).encode("utf8")).hexdigest() + "@stratum0.org")
 		event.add('summary', self.getPlainName().encode("utf8"))
 		url = self.getURL()
 		if url:
@@ -621,9 +615,9 @@ def render_page(flatend):
 			r += u"%s\n" % value.getMediawikiRow()
 		elif token == T_INVALID_EVENT:
 			r += u"%s\n" % value
-			print str(token), repr(value)
+			print(str(token), repr(value))
 		else:
-			print str(token), repr(value)
+			print(str(token), repr(value))
 	return r.strip()
 
 
@@ -689,7 +683,7 @@ def in_before(entries, now_):
 def generate_wiki_section(entries, templatefile, lang=LANG_DE, now=None):
 	if now is None:
 		now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(tz)
-	result = file(templatefile).read().decode("utf8")
+	result = open(templatefile).read()
 	next_dates = []
 	for i in next_up(entries, now):
 		next_dates.append(i.getMediawikiEntry(lang=lang))
@@ -703,8 +697,8 @@ def generate_wiki_section(entries, templatefile, lang=LANG_DE, now=None):
 
 
 def write_if_changed(filename, content):
-	if not os.path.exists(filename) or content != file(filename).read():
-		f = file(filename, "w")
+	if not os.path.exists(filename) or content != open(filename).read():
+		f = open(filename, "w")
 		f.write(content)
 		f.close()
 
@@ -741,7 +735,9 @@ def generate_ical(entries, filename):
 		component = entry.getIcal()
 		if component:
 			cal.add_component(component)
-	write_if_changed(filename, cal.to_ical())
+
+	# note: to_ical() returns bytes, but this is not documented.
+	write_if_changed(filename, cal.to_ical().decode("utf8"))
 
 
 def generate_json_css(entries, jsonfile, cssfile):
@@ -758,10 +754,11 @@ def generate_json_css(entries, jsonfile, cssfile):
 		"success": 1,
 		"result": e}
 
-	write_if_changed(jsonfile, json.dumps(result).encode("utf8"))
+	write_if_changed(jsonfile, json.dumps(result))
 
 	css_content = ""
 	for group in css:
-		color = "".join(map(lambda a: chr(int(a * 2, 16) | 0x1F).encode("hex"), list(hashlib.md5(group).hexdigest()[:3])))
+		(r, g, b) = hashlib.md5(group.encode("utf8")).hexdigest()[:3]
+		color = r + "f" + g + "f" + b + "f"
 		css_content += ".{name},.dh-{name} {{background-color:#{color};}}\n".format(name=group, color=color)
 	write_if_changed(cssfile, css_content)

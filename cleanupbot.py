@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -.- encoding: utf-8 -.-
 import mwclient
 import config
@@ -25,11 +25,11 @@ termine_changed = False
 archiv_changed = False
 
 if termine_text != new_termine_text:
-	print "termine changed"
+	print("termine changed")
 	termine_changed = True
 
 if termine_archiv_text != new_termine_archiv_text:
-	print "archiv changed"
+	print("archiv changed")
 	archiv_changed = True
 
 comment = u"Termine cleanup"
@@ -39,8 +39,8 @@ if n > 0:
 minor_edit = n == 0
 
 if termine_changed or archiv_changed:
-	print ">", comment.encode("utf8")
-	print "minor:", minor_edit
+	print(">", comment)
+	print("minor:", minor_edit)
 
 if config.write_wiki and (termine_changed or archiv_changed):
 	if not site.logged_in:
