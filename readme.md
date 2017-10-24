@@ -6,9 +6,15 @@ stratum0-calendar generates multiple calendar/events representations for [stratu
 * wiki-pages in multiple languages
 
 ## Installation
+0. Be sure to use Python 3. If in doubt, set up a [virtualenv][] with `$ virtualenv -p python3 venv; . venv/bin/activate`
 1. `$ pip install -r requirements.txt`
 2. setup `config.py` (see `config.py.example` for an example)
 3. run `$ ./bot.py`
+
+[virtualenv]: https://virtualenv.pypa.io/en/stable/
+
+### Tests
+To run the tests, do a `pip install -r requirements-tests.txt`, followed by a `python -m nose`.
 
 ## Supported Date-Formats
 
