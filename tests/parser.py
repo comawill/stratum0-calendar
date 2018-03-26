@@ -37,6 +37,10 @@ class TestUrls(unittest.TestCase):
 		self.assertEqual(url_date.getPlainName(), "31C3 (Assembly)")
 		self.assertEqual(url_date.getURL(), "https://events.ccc.de/congress/2014/")
 
+		url_date2 = cg.SingleDate("[[Vorträge]] ([[Vorträge/Vorbei#2018|Aufzeichnungen]])", "Vorträge", [14, 1, 2018])
+		self.assertEqual(url_date2.getPlainName(), "Vorträge (Aufzeichnungen)")
+		self.assertEqual(url_date2.getURL(), "https://stratum0.org/wiki/Vortr%C3%A4ge")
+
 	def test_firstUrl(self):
 		url_date = cg.SingleDate("abc [https://stratum0.net/ title] [[test_url|test_title]]", "cat", [20, 9, 2014])
 		self.assertEqual(url_date.getURL(), "https://stratum0.net/")
