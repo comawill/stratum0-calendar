@@ -7,44 +7,44 @@ import config
 import calendargenerator
 import os
 
-site = mwclient.Site((config.protocol, config.server), path="/mediawiki/")
+if __name__ == "__main__":
+	site = mwclient.Site((config.protocol, config.server), path="/mediawiki/")
 
-termine = site.Pages["Termine"]
-comment = None
-entries = calendargenerator.parse_wiki_page(termine.text())
-expanded_entries = calendargenerator.expand_dates(entries)
+	termine = site.Pages["Termine"]
+	comment = None
+	entries = calendargenerator.parse_wiki_page(termine.text())
+	expanded_entries = calendargenerator.expand_dates(entries)
 
+	def update(entries, page, purge_page, templatefile, lang):
+		global comment
+		templatefile = os.path.join(os.path.dirname(__file__), templatefile)
+		page_data = site.Pages[page]
+		old = page_data.text()
+		text = calendargenerator.generate_wiki_section(entries, templatefile, lang)
+		if old != text:
+			print("updating %s" % page)
+			if not comment:
+				rev = termine.revisions(limit=1, prop='timestamp|user|comment').next()
+				changed = datetime.datetime.fromtimestamp(time.mktime(rev["timestamp"]))
+				now = datetime.datetime.utcnow()
+				comment = u"Automatisches Update (irgendwas wird sich schon verändert haben)"
+				if (now - changed) < datetime.timedelta(minutes=15):
+					comment = u"%s hat Termine aktualisiert (%s) " % (rev["user"], rev["comment"])
+			print(comment)
+			if not site.logged_in:
+				site.login(config.user, config.password)
+			if config.write_wiki:
+				page_data.save(text, comment, minor=True)
+				try:
+					site.Pages[purge_page].purge()
+				except mwclient.errors.HTTPRedirectError:
+					pass
+			else:
+				print("no write")
 
-def update(entries, page, purge_page, templatefile, lang):
-	global comment
-	templatefile = os.path.join(os.path.dirname(__file__), templatefile)
-	page_data = site.Pages[page]
-	old = page_data.text()
-	text = calendargenerator.generate_wiki_section(entries, templatefile, lang)
-	if old != text:
-		print("updating %s" % page)
-		if not comment:
-			rev = termine.revisions(limit=1, prop='timestamp|user|comment').next()
-			changed = datetime.datetime.fromtimestamp(time.mktime(rev["timestamp"]))
-			now = datetime.datetime.utcnow()
-			comment = u"Automatisches Update (irgendwas wird sich schon verändert haben)"
-			if (now - changed) < datetime.timedelta(minutes=15):
-				comment = u"%s hat Termine aktualisiert (%s) " % (rev["user"], rev["comment"])
-		print(comment)
-		if not site.logged_in:
-			site.login(config.user, config.password)
-		if config.write_wiki:
-			page_data.save(text, comment, minor=True)
-			try:
-				site.Pages[purge_page].purge()
-			except mwclient.errors.HTTPRedirectError:
-				pass
-		else:
-			print("no write")
+	update(expanded_entries, "Template:Termine/de", "Hauptseite", "templates/termine_haupt.de.wiki", calendargenerator.LANG_DE)
+	update(expanded_entries, "Template:Termine/en", "English", "templates/termine_haupt.en.wiki", calendargenerator.LANG_EN)
+	update(expanded_entries, "Template:Termine/fr", u"Français", "templates/termine_haupt.fr.wiki", calendargenerator.LANG_FR)
 
-update(expanded_entries, "Template:Termine/de", "Hauptseite", "templates/termine_haupt.de.wiki", calendargenerator.LANG_DE)
-update(expanded_entries, "Template:Termine/en", "English", "templates/termine_haupt.en.wiki", calendargenerator.LANG_EN)
-update(expanded_entries, "Template:Termine/fr", u"Français", "templates/termine_haupt.fr.wiki", calendargenerator.LANG_FR)
-
-calendargenerator.generate_ical(entries, config.ical)
-calendargenerator.generate_json_css(expanded_entries, config.json, config.css)
+	calendargenerator.generate_ical(entries, config.ical)
+	calendargenerator.generate_json_css(expanded_entries, config.json, config.css)
